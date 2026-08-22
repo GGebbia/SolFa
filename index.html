@@ -21,7 +21,6 @@
   --amber:#F2B441;
   --rose:#E0607E;
   --violet:#7B6CF6;
-  --teal:#4FD1C5;
   --display:"Fraunces","Iowan Old Style",Georgia,serif;
   --body:"Inter Tight","Helvetica Neue",Arial,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
@@ -29,88 +28,64 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 body{
-  background:
-    radial-gradient(120% 60% at 50% -10%, #1B2140 0%, rgba(27,33,64,0) 60%),
-    var(--ink);
-  color:var(--text);
-  font-family:var(--body);
-  font-size:16px;
-  line-height:1.45;
-  min-height:100dvh;
-  padding:max(14px,env(safe-area-inset-top)) 14px max(20px,env(safe-area-inset-bottom));
+  background:radial-gradient(120% 60% at 50% -10%, #1B2140 0%, rgba(27,33,64,0) 60%), var(--ink);
+  color:var(--text);font-family:var(--body);font-size:16px;line-height:1.45;
+  min-height:100dvh;padding:max(12px,env(safe-area-inset-top)) 12px max(18px,env(safe-area-inset-bottom));
   overflow-x:hidden;
 }
-.wrap{max-width:520px;margin:0 auto}
-
-/* ---- header ---- */
-.top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}
-.brand{font-family:var(--display);font-optical-sizing:auto;font-weight:600;font-size:26px;letter-spacing:-0.02em}
+.wrap{max-width:540px;margin:0 auto}
+.top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+.brand{font-family:var(--display);font-weight:600;font-size:25px;letter-spacing:-.02em}
 .brand em{font-style:italic;color:var(--amber)}
 .score{font-family:var(--mono);font-size:12px;color:var(--mute);text-align:right}
 .score b{color:var(--text);font-weight:600}
 
-/* ---- tabs ---- */
-.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:5px;margin-bottom:12px}
-.tab{appearance:none;border:0;background:transparent;color:var(--mute);font-family:var(--body);font-size:15px;font-weight:500;padding:10px 8px;border-radius:10px;cursor:pointer;transition:background .18s,color .18s}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:5px;margin-bottom:10px}
+.tab{border:0;background:transparent;color:var(--mute);font-family:var(--body);font-size:15px;font-weight:500;padding:10px 8px;border-radius:10px;cursor:pointer}
 .tab[aria-selected="true"]{background:var(--panel-2);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
 
-/* ---- settings chips ---- */
-.settings{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.settings{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .chip{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 6px 5px 11px}
-.chip>span{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--mute)}
-.chip select{appearance:none;border:0;background:var(--panel-2);color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 9px;border-radius:999px;cursor:pointer}
+.chip>span{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--mute)}
+.chip select{appearance:none;border:0;background:var(--panel-2);color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 9px;border-radius:999px;cursor:pointer;max-width:42vw}
 .chip select:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
 
-/* ---- cards ---- */
-.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin-bottom:12px}
-.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:10px}
+.eyebrow{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 10px}
 .hidden{display:none !important}
 
-/* ---- big syllable ---- */
-.syllable{font-family:var(--display);font-style:italic;font-weight:600;font-size:clamp(52px,17vw,80px);line-height:.95;letter-spacing:-.03em;margin:0;transition:color .2s}
-.syllable small{display:block;font-family:var(--mono);font-style:normal;font-size:12px;font-weight:400;letter-spacing:.08em;color:var(--mute);margin-top:10px}
-.prompt-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
-
-/* ---- buttons ---- */
-.btn{appearance:none;font-family:var(--body);font-size:15px;font-weight:500;border-radius:12px;padding:13px 16px;cursor:pointer;border:1px solid var(--line);background:var(--panel-2);color:var(--text);transition:transform .1s,background .18s,border-color .18s}
+.btn{font-family:var(--body);font-size:15px;font-weight:500;border-radius:12px;padding:13px 16px;cursor:pointer;border:1px solid var(--line);background:var(--panel-2);color:var(--text);transition:transform .1s}
 .btn:active{transform:scale(.975)}
-.btn:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
 .btn.primary{background:var(--violet);border-color:var(--violet);color:#fff}
 .btn.ghost{background:transparent}
+.btn:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
 .btn[disabled]{opacity:.42;cursor:not-allowed}
-.btn-row{display:flex;gap:8px;margin-top:14px}
+.btn-row{display:flex;gap:8px;margin-top:12px}
 .btn-row .btn{flex:1}
 
-/* ---- answer grid ---- */
-.answers{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:16px}
-.ans{appearance:none;border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:12px;padding:14px 4px;cursor:pointer;font-family:var(--display);font-style:italic;font-weight:600;font-size:19px;transition:background .15s,border-color .15s,transform .1s}
+.answers{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:14px}
+.ans{border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:12px;padding:13px 2px;cursor:pointer;font-family:var(--display);font-style:italic;font-weight:600;font-size:18px}
 .ans:active{transform:scale(.96)}
 .ans:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
 .ans.right{background:rgba(242,180,65,.16);border-color:var(--amber);color:var(--amber)}
 .ans.wrong{background:rgba(224,96,126,.14);border-color:var(--rose);color:var(--rose)}
-.ans[disabled]{cursor:default}
 
-/* ---- ribbon (signature) ---- */
-.ribbon-wrap{position:relative;margin:6px -16px 0;padding:0 16px}
-canvas{display:block;width:100%;height:230px;touch-action:none}
-.readout{position:absolute;top:8px;right:22px;text-align:right;font-family:var(--mono);font-size:11px;color:var(--mute);pointer-events:none}
-.readout b{display:block;font-size:22px;font-weight:600;color:var(--text);letter-spacing:-.01em}
-.cents{position:absolute;top:8px;left:22px;font-family:var(--mono);font-size:11px;color:var(--mute);pointer-events:none}
-.cents b{display:block;font-size:22px;font-weight:600;letter-spacing:-.01em;color:var(--mute)}
-.hold{height:5px;border-radius:99px;background:var(--panel-2);overflow:hidden;margin-top:12px}
-.hold i{display:block;height:100%;width:0;background:var(--amber);border-radius:99px;transition:width .08s linear}
-.holdlabel{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-top:7px}
+.queue{display:flex;gap:6px;align-items:center;overflow:hidden;margin-bottom:8px;height:38px}
+.qnote{flex:0 0 auto;font-family:var(--display);font-style:italic;font-weight:600;font-size:17px;padding:4px 11px;border-radius:9px;background:var(--panel-2);color:var(--mute);border:1px solid var(--line)}
+.qnote.now{background:rgba(242,180,65,.16);border-color:var(--amber);color:var(--amber)}
 
-/* ---- status / notes ---- */
-.note{font-size:13.5px;color:var(--mute);margin:12px 0 0}
-.note strong{color:var(--text);font-weight:500}
+.field{position:relative;margin:0 -16px;padding:0 12px}
+canvas{display:block;width:100%;height:min(46vh,340px);touch-action:none}
+.hud{position:absolute;top:6px;left:20px;font-family:var(--mono);font-size:11px;color:var(--mute);pointer-events:none}
+.hud b{color:var(--text);font-weight:600}
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;background:rgba(14,18,32,.72);border-radius:14px}
+.overlay h2{font-family:var(--display);font-style:italic;font-weight:600;font-size:34px;margin:0;letter-spacing:-.02em}
+.overlay p{margin:0;font-size:13.5px;color:var(--mute);max-width:76%}
+
 .status{font-family:var(--mono);font-size:12px;color:var(--mute);margin-top:12px}
 .status.err{color:var(--rose)}
-.foot{font-size:11.5px;color:var(--mute);text-align:center;margin-top:18px;line-height:1.6}
-
-@media (prefers-reduced-motion: reduce){
-  *{transition:none !important}
-}
+.foot{font-size:11.5px;color:var(--mute);text-align:center;margin-top:16px;line-height:1.6}
+@media (prefers-reduced-motion: reduce){*{transition:none !important}}
 </style>
 </head>
 <body>
@@ -118,36 +93,25 @@ canvas{display:block;width:100%;height:230px;touch-action:none}
 
   <div class="top">
     <div class="brand">Sol<em>fa</em></div>
-    <div class="score">streak <b id="streak">0</b> · <b id="hits">0</b>/<b id="tries">0</b></div>
+    <div class="score" id="scoreBox">streak <b id="streak">0</b> · <b id="hits">0</b>/<b id="tries">0</b></div>
   </div>
 
   <div class="tabs" role="tablist">
     <button class="tab" id="tab-ear" role="tab" aria-selected="true">Ear</button>
-    <button class="tab" id="tab-voice" role="tab" aria-selected="false">Voice</button>
+    <button class="tab" id="tab-run" role="tab" aria-selected="false">Run</button>
   </div>
 
   <div class="settings">
+    <label class="chip"><span>Scale</span><select id="scale"></select></label>
+    <label class="chip"><span>Key</span><select id="key"></select></label>
     <label class="chip"><span>Do</span>
-      <select id="doSystem">
-        <option value="movable">movable</option>
-        <option value="fixed">fixed</option>
-      </select>
-    </label>
-    <label class="chip"><span>Key</span>
-      <select id="key"></select>
+      <select id="doSystem"><option value="movable">movable</option><option value="fixed">fixed</option></select>
     </label>
     <label class="chip"><span>Range</span>
-      <select id="octave">
-        <option value="3">low</option>
-        <option value="4" selected>high</option>
-      </select>
+      <select id="octave"><option value="2">bass</option><option value="3" selected>low</option><option value="4">high</option></select>
     </label>
-    <label class="chip" id="tolChip"><span>Tolerance</span>
-      <select id="tolerance">
-        <option value="50">±50¢</option>
-        <option value="30" selected>±30¢</option>
-        <option value="15">±15¢</option>
-      </select>
+    <label class="chip" id="gapChip"><span>Gap</span>
+      <select id="gap"><option value="90">wide</option><option value="55" selected>normal</option><option value="30">tight</option></select>
     </label>
   </div>
 
@@ -155,62 +119,80 @@ canvas{display:block;width:100%;height:230px;touch-action:none}
   <section id="panel-ear">
     <div class="card">
       <p class="eyebrow">Name the note</p>
-      <p class="note" id="earPrompt">Solfa plays the tonic, then one note of the scale. Name the second one.</p>
+      <p class="status" id="earHint">One note, no reference. Name it.</p>
       <div class="btn-row">
-        <button class="btn primary" id="earPlay">Play the pair</button>
+        <button class="btn primary" id="earPlay">Play a note</button>
         <button class="btn ghost" id="earRepeat" disabled>Repeat</button>
       </div>
       <div class="answers" id="earAnswers"></div>
+      <div class="btn-row">
+        <button class="btn ghost" id="earTonic">Hear the tonic (if you want the crutch)</button>
+      </div>
       <p class="status" id="earStatus">Ready when you are.</p>
     </div>
   </section>
 
-  <!-- ============ VOICE ============ -->
-  <section id="panel-voice" class="hidden">
+  <!-- ============ RUN ============ -->
+  <section id="panel-run" class="hidden">
     <div class="card">
-      <div class="prompt-row">
-        <h1 class="syllable" id="target">do<small id="targetNote">C</small></h1>
-        <button class="btn ghost" id="hearIt">Hear it</button>
+      <div class="queue" id="queue"></div>
+      <div class="field">
+        <canvas id="game"></canvas>
+        <div class="hud"><b id="hudNote">—</b> <span id="hudCents"></span></div>
+        <div class="overlay" id="overlay">
+          <h2 id="ovTitle">Pitch run</h2>
+          <p id="ovText">Sing the note on each wall. Your voice moves the ball: higher pitch lifts it, lower drops it.</p>
+        </div>
       </div>
-
-      <div class="ribbon-wrap">
-        <canvas id="ribbon"></canvas>
-        <div class="cents"><b id="centsVal">—</b>cents</div>
-        <div class="readout"><b id="noteVal">—</b><span id="hzVal">silence</span></div>
-      </div>
-
-      <div class="hold"><i id="holdBar"></i></div>
-      <div class="holdlabel"><span id="holdText">hold on pitch</span><span id="holdGoal">1.2 s</span></div>
-
       <div class="btn-row">
         <button class="btn primary" id="micBtn">Turn on microphone</button>
-        <button class="btn ghost" id="skipBtn">Skip</button>
+        <button class="btn ghost" id="startBtn" disabled>Start run</button>
       </div>
-      <p class="status" id="voiceStatus">Any octave counts — sing it where it sits comfortably.</p>
+      <p class="status" id="runStatus">Headphones recommended.</p>
     </div>
   </section>
 
-  <p class="foot">Headphones help: speaker sound leaking into the microphone confuses the detector.</p>
+  <p class="foot">Pitch detection runs entirely in your browser. Nothing is recorded or uploaded.</p>
 </div>
 
 <script>
 /* ============================================================
    MUSIC
    ============================================================ */
-const NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
-const FIXED = ["do","do♯","re","re♯","mi","fa","fa♯","sol","sol♯","la","la♯","si"];
-const MOVABLE = ["do","di","re","ri","mi","fa","fi","sol","si","la","li","ti"];
-const MAJOR = [0,2,4,5,7,9,11];
+const SHARP_N = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const FLAT_N  = ["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];
+const SHARP_S = ["do","do♯","re","re♯","mi","fa","fa♯","sol","sol♯","la","la♯","si"];
+const FLAT_S  = ["do","re♭","re","mi♭","mi","fa","sol♭","sol","la♭","la","si♭","si"];
+
+const SCALES = {
+  major:      { label:"major",        steps:[0,2,4,5,7,9,11],            flat:false },
+  minor:      { label:"minor",        steps:[0,2,3,5,7,8,10],            flat:true  },
+  harmonic:   { label:"harm minor",   steps:[0,2,3,5,7,8,11],            flat:true  },
+  dorian:     { label:"dorian",       steps:[0,2,3,5,7,9,10],            flat:true  },
+  mixolydian: { label:"mixolydian",   steps:[0,2,4,5,7,9,10],            flat:true  },
+  pentaMaj:   { label:"penta major",  steps:[0,2,4,7,9],                 flat:false },
+  pentaMin:   { label:"penta minor",  steps:[0,3,5,7,10],                flat:true  },
+  blues:      { label:"blues",        steps:[0,3,5,6,7,10],              flat:true  },
+  wholeTone:  { label:"whole tone",   steps:[0,2,4,6,8,10],              flat:false },
+  hijaz:      { label:"hijaz",        steps:[0,1,4,5,7,8,11],            flat:true  },
+  chromatic:  { label:"chromatic",    steps:[0,1,2,3,4,5,6,7,8,9,10,11], flat:false }
+};
 
 const midiToFreq = m => 440 * Math.pow(2, (m - 69) / 12);
 const freqToMidi = f => 69 + 12 * Math.log2(f / 440);
 
-function syllable(pc, tonicPc, system){
-  if (system === "fixed") return FIXED[((pc % 12) + 12) % 12];
-  return MOVABLE[(((pc - tonicPc) % 12) + 12) % 12];
+function scaleDef(){ return SCALES[S.scale]; }
+function sylArr(){ return scaleDef().flat ? FLAT_S : SHARP_S; }
+function nameArr(){ return scaleDef().flat ? FLAT_N : SHARP_N; }
+
+function syllable(pc){
+  const a = sylArr();
+  if (S.system === "fixed") return a[((pc % 12) + 12) % 12];
+  return a[(((pc - S.tonicPc) % 12) + 12) % 12];
 }
-function noteName(midi){
-  return NAMES[((Math.round(midi) % 12) + 12) % 12] + (Math.floor(Math.round(midi) / 12) - 1);
+function noteLabel(midi){
+  const r = Math.round(midi);
+  return nameArr()[((r % 12) + 12) % 12] + (Math.floor(r / 12) - 1);
 }
 
 /* ============================================================
@@ -222,19 +204,14 @@ function audio(){
   if (ctx.state === "suspended") ctx.resume();
   return ctx;
 }
-function playTone(freq, dur = 0.75, delay = 0){
-  const a = audio();
-  const t = a.currentTime + delay;
-  const osc = a.createOscillator();
-  const gain = a.createGain();
-  const filt = a.createBiquadFilter();
-  filt.type = "lowpass";
-  filt.frequency.value = Math.min(6000, freq * 6);
-  osc.type = "triangle";
-  osc.frequency.value = freq;
+function playTone(freq, dur = 0.8, delay = 0, vol = 0.22){
+  const a = audio(), t = a.currentTime + delay;
+  const osc = a.createOscillator(), gain = a.createGain(), filt = a.createBiquadFilter();
+  filt.type = "lowpass"; filt.frequency.value = Math.min(6000, freq * 6);
+  osc.type = "triangle"; osc.frequency.value = freq;
   gain.gain.setValueAtTime(0.0001, t);
-  gain.gain.exponentialRampToValueAtTime(0.22, t + 0.02);
-  gain.gain.setValueAtTime(0.22, t + dur - 0.15);
+  gain.gain.exponentialRampToValueAtTime(vol, t + 0.02);
+  gain.gain.setValueAtTime(vol, t + dur - 0.15);
   gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   osc.connect(filt); filt.connect(gain); gain.connect(a.destination);
   osc.start(t); osc.stop(t + dur + 0.05);
@@ -253,21 +230,17 @@ function detectPitch(buf, sr){
   const minLag = Math.max(2, Math.floor(sr / 1100));
   const maxLag = Math.min(Math.floor(sr / 65), SIZE >> 1);
   const nsdf = new Float32Array(maxLag + 2);
-
   for (let lag = minLag; lag <= maxLag; lag++){
     let r = 0, m = 0;
     for (let i = 0, n = SIZE - lag; i < n; i++){
       const a = buf[i], b = buf[i + lag];
-      r += a * b;
-      m += a * a + b * b;
+      r += a * b; m += a * a + b * b;
     }
     nsdf[lag] = m > 0 ? (2 * r) / m : 0;
   }
-
-  // collect local maxima of each positive region
   const peaks = [];
   let lag = minLag;
-  while (lag <= maxLag && nsdf[lag] > 0) lag++;   // skip the region attached to lag 0
+  while (lag <= maxLag && nsdf[lag] > 0) lag++;
   while (lag <= maxLag){
     if (nsdf[lag] > 0){
       let pl = lag, pv = nsdf[lag];
@@ -279,13 +252,11 @@ function detectPitch(buf, sr){
     } else lag++;
   }
   if (!peaks.length) return null;
-
   let best = 0;
   for (const p of peaks) if (p[1] > best) best = p[1];
   if (best < 0.55) return null;
   const chosen = peaks.find(p => p[1] >= 0.88 * best);
   if (!chosen) return null;
-
   const [pl, pv] = chosen;
   const y0 = nsdf[pl - 1] || pv, y1 = pv, y2 = nsdf[pl + 1] || pv;
   const denom = 2 * (2 * y1 - y0 - y2);
@@ -300,31 +271,40 @@ function detectPitch(buf, sr){
    ============================================================ */
 const S = {
   mode: "ear",
+  scale: "major",
   tonicPc: 0,
   system: "movable",
-  octave: 4,
-  tolerance: 30,
+  octave: 3,
+  gapCents: 55,
   streak: 0, hits: 0, tries: 0,
-  ear: { targetPc: null, targetMidi: null, answered: false },
-  voice: { targetPc: null, held: 0, done: false },
-  mic: { on: false, stream: null, analyser: null, buf: null, raf: 0, last: 0 }
+  best: 0,
+  ear: { midi: null, answered: false },
+  mic: { on: false, stream: null, analyser: null, buf: null },
+  game: { state: "idle", walls: [], seq: [], idx: 0, cleared: 0, countdown: 0 }
 };
-const HOLD_GOAL = 1.2;
-
 const $ = id => document.getElementById(id);
 
-/* ---- settings ---- */
-const keySel = $("key");
-NAMES.forEach((n, i) => {
+/* fill selects */
+Object.keys(SCALES).forEach(k => {
   const o = document.createElement("option");
-  o.value = i; o.textContent = n;
-  keySel.appendChild(o);
+  o.value = k; o.textContent = SCALES[k].label;
+  $("scale").appendChild(o);
 });
-keySel.value = "0";
+function fillKeys(){
+  const cur = $("key").value;
+  $("key").innerHTML = "";
+  nameArr().forEach((n, i) => {
+    const o = document.createElement("option");
+    o.value = i; o.textContent = n;
+    $("key").appendChild(o);
+  });
+  $("key").value = cur || "0";
+}
+fillKeys();
 
 function scaleMidis(){
   const base = 12 * (S.octave + 1) + S.tonicPc;
-  return MAJOR.map(iv => base + iv);
+  return scaleDef().steps.map(iv => base + iv);
 }
 function refreshScore(){
   $("streak").textContent = S.streak;
@@ -333,16 +313,16 @@ function refreshScore(){
 }
 
 /* ============================================================
-   EAR CHALLENGE
+   EAR — one note, no reference
    ============================================================ */
 function buildAnswers(){
   const grid = $("earAnswers");
   grid.innerHTML = "";
   scaleMidis().forEach(m => {
-    const pc = m % 12;
+    const pc = ((m % 12) + 12) % 12;
     const b = document.createElement("button");
     b.className = "ans";
-    b.textContent = syllable(pc, S.tonicPc, S.system);
+    b.textContent = syllable(pc);
     b.dataset.pc = pc;
     b.onclick = () => answerEar(pc, b);
     grid.appendChild(b);
@@ -352,260 +332,297 @@ function newEarRound(){
   const notes = scaleMidis();
   let m;
   do { m = notes[Math.floor(Math.random() * notes.length)]; }
-  while (m === S.ear.targetMidi && notes.length > 1);
-  S.ear.targetMidi = m;
-  S.ear.targetPc = m % 12;
+  while (m === S.ear.midi && notes.length > 1);
+  S.ear.midi = m;
   S.ear.answered = false;
-  [...$("earAnswers").children].forEach(b => {
-    b.classList.remove("right", "wrong");
-    b.disabled = false;
-  });
-  $("earStatus").textContent = "Listening room is yours.";
+  [...$("earAnswers").children].forEach(b => { b.classList.remove("right","wrong"); b.disabled = false; });
+  $("earStatus").textContent = "Name it.";
   $("earStatus").classList.remove("err");
-  playEarPair();
-}
-function playEarPair(){
-  const tonic = midiToFreq(12 * (S.octave + 1) + S.tonicPc);
-  playTone(tonic, 0.65, 0);
-  playTone(midiToFreq(S.ear.targetMidi), 0.9, 0.85);
-  $("earRepeat").disabled = false;
   $("earPlay").textContent = "New note";
+  $("earRepeat").disabled = false;
+  playTone(midiToFreq(m), 1.0);
 }
 function answerEar(pc, btn){
-  if (S.ear.answered || S.ear.targetPc === null) return;
-  S.ear.answered = true;
-  S.tries++;
-  const correct = pc === S.ear.targetPc;
+  if (S.ear.answered || S.ear.midi === null) return;
+  S.ear.answered = true; S.tries++;
+  const target = ((S.ear.midi % 12) + 12) % 12;
   [...$("earAnswers").children].forEach(b => {
     b.disabled = true;
-    if (+b.dataset.pc === S.ear.targetPc) b.classList.add("right");
+    if (+b.dataset.pc === target) b.classList.add("right");
   });
-  if (correct){
+  if (pc === target){
     S.hits++; S.streak++;
-    $("earStatus").textContent = "Correct. Next one in a moment.";
+    $("earStatus").textContent = "Correct.";
     $("earStatus").classList.remove("err");
-    playTone(midiToFreq(S.ear.targetMidi), 0.5);
-    setTimeout(newEarRound, 1100);
+    setTimeout(newEarRound, 900);
   } else {
     S.streak = 0;
     btn.classList.add("wrong");
-    const right = syllable(S.ear.targetPc, S.tonicPc, S.system);
-    $("earStatus").textContent = "It was " + right + " — play it again and listen for the distance.";
+    $("earStatus").textContent = "It was " + syllable(target) + " (" + noteLabel(S.ear.midi) + ").";
     $("earStatus").classList.add("err");
   }
   refreshScore();
 }
 $("earPlay").onclick = () => { audio(); newEarRound(); };
-$("earRepeat").onclick = () => { if (S.ear.targetMidi !== null) playEarPair(); };
+$("earRepeat").onclick = () => { if (S.ear.midi !== null) playTone(midiToFreq(S.ear.midi), 1.0); };
+$("earTonic").onclick = () => { audio(); playTone(midiToFreq(12 * (S.octave + 1) + S.tonicPc), 0.9, 0, 0.18); };
 
 /* ============================================================
-   VOICE CHALLENGE
+   RUN — the wall game
    ============================================================ */
-function newVoiceRound(){
+const cv = $("game"), g = cv.getContext("2d");
+let W = 0, H = 0, dpr = 1;
+const SPAN = 15;                       // semitones visible top to bottom
+const BALL_X_FRAC = 0.26;
+const CROSS_TIME = 4.2;                // seconds for a wall to cross the field
+const WALL_GAP_T = 2.3;                // seconds between walls
+const WALL_W = 16;
+
+function lowMidi(){ return 12 * (S.octave + 1) + S.tonicPc - 2; }
+function yForMidi(m){
+  const t = (m - lowMidi()) / SPAN;
+  return H - Math.max(-0.15, Math.min(1.15, t)) * H;
+}
+function sizeCanvas(){
+  const r = cv.getBoundingClientRect();
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  W = r.width; H = r.height;
+  cv.width = W * dpr; cv.height = H * dpr;
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener("resize", () => { if (S.mode === "run") sizeCanvas(); });
+
+const ball = { y: 0, trail: [] };
+
+function makeSequence(n){
   const notes = scaleMidis();
-  let m;
-  do { m = notes[Math.floor(Math.random() * notes.length)]; }
-  while (m % 12 === S.voice.targetPc && notes.length > 1);
-  S.voice.targetPc = m % 12;
-  S.voice.refMidi = m;
-  S.voice.held = 0;
-  S.voice.done = false;
-  trail.length = 0;
-  $("target").firstChild.nodeValue = syllable(S.voice.targetPc, S.tonicPc, S.system);
-  $("targetNote").textContent = NAMES[S.voice.targetPc] + " · any octave";
-  $("target").style.color = "";
-  $("holdText").textContent = "hold on pitch";
-  $("holdBar").style.width = "0%";
-  if (S.mode === "voice") setTimeout(() => playTone(midiToFreq(m), 0.8), 250);
+  const seq = [];
+  let prev = null;
+  for (let i = 0; i < n; i++){
+    let m;
+    do { m = notes[Math.floor(Math.random() * notes.length)]; } while (m === prev && notes.length > 1);
+    seq.push(m); prev = m;
+  }
+  return seq;
 }
-$("hearIt").onclick = () => { audio(); playTone(midiToFreq(S.voice.refMidi), 0.8); };
-$("skipBtn").onclick = () => { S.streak = 0; refreshScore(); newVoiceRound(); };
+function renderQueue(){
+  const q = $("queue");
+  q.innerHTML = "";
+  const G = S.game;
+  for (let i = G.idx; i < Math.min(G.idx + 6, G.seq.length); i++){
+    const d = document.createElement("div");
+    d.className = "qnote" + (i === G.idx ? " now" : "");
+    d.textContent = syllable(((G.seq[i] % 12) + 12) % 12);
+    q.appendChild(d);
+  }
+}
+function showOverlay(title, text){
+  $("ovTitle").textContent = title;
+  $("ovText").textContent = text;
+  $("overlay").classList.remove("hidden");
+}
+function hideOverlay(){ $("overlay").classList.add("hidden"); }
 
-function micReason(e){
-  if (window.self !== window.top)
-    return "Blocked: this page is running inside an embedded preview frame, which is not granted microphone permission. Save the file and open it on its own over https.";
-  if (!window.isSecureContext)
-    return "Blocked: browsers only expose the microphone over https or on localhost. This page is on " + location.protocol;
-  if (e && e.name === "NotAllowedError")
-    return "Permission denied. Allow the microphone for this site in the browser settings and reload.";
-  if (e && e.name === "NotFoundError")
-    return "No input device found.";
-  return "Microphone unavailable: " + (e && e.name ? e.name : "unknown error");
+function startRun(){
+  if (!S.mic.on) return;
+  const G = S.game;
+  G.seq = makeSequence(40);
+  G.idx = 0; G.cleared = 0; G.walls = [];
+  G.state = "count"; G.countdown = 3.2;
+  ball.y = H / 2; ball.trail.length = 0;
+  renderQueue();
+  hideOverlay();
+  playTone(midiToFreq(12 * (S.octave + 1) + S.tonicPc), 0.7, 0, 0.16);
+  $("startBtn").textContent = "Restart";
+}
+$("startBtn").onclick = () => { audio(); startRun(); };
+
+function spawnWall(){
+  const G = S.game;
+  if (G.idx + G.walls.length >= G.seq.length) return;
+  const midi = G.seq[G.idx + G.walls.length];
+  G.walls.push({ x: W + WALL_W, midi, hit: false, resolved: false });
+}
+function endRun(){
+  const G = S.game;
+  G.state = "over";
+  S.best = Math.max(S.best, G.cleared);
+  showOverlay(G.cleared + " cleared", "Best " + S.best + ". The ball drops when it misses a gap — tap Restart to run it again.");
 }
 
+/* ---- mic ---- */
 async function toggleMic(){
   if (S.mic.on){ stopMic(); return; }
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    $("voiceStatus").textContent = micReason(null);
-    $("voiceStatus").classList.add("err");
-    return;
+    $("runStatus").textContent = micReason(null); $("runStatus").classList.add("err"); return;
   }
   try {
     audio();
     const stream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+      audio: { echoCancellation:false, noiseSuppression:false, autoGainControl:false }
     });
     const a = audio();
     const src = a.createMediaStreamSource(stream);
-    const hp = a.createBiquadFilter();
-    hp.type = "highpass"; hp.frequency.value = 60;
-    const an = a.createAnalyser();
-    an.fftSize = 2048;
+    const hp = a.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 60;
+    const an = a.createAnalyser(); an.fftSize = 2048;
     src.connect(hp); hp.connect(an);
-    S.mic = { on: true, stream, analyser: an, buf: new Float32Array(an.fftSize), raf: 0, last: 0 };
+    S.mic = { on:true, stream, analyser:an, buf:new Float32Array(an.fftSize) };
     $("micBtn").textContent = "Turn off microphone";
-    $("voiceStatus").textContent = "Listening. Any octave counts.";
-    $("voiceStatus").classList.remove("err");
-    loop();
+    $("startBtn").disabled = false;
+    $("runStatus").textContent = "Listening.";
+    $("runStatus").classList.remove("err");
+    showOverlay("Ready", "Tap Start run. Sing the note shown on each wall to steer the ball through the gap.");
   } catch (e){
-    $("voiceStatus").textContent = micReason(e);
-    $("voiceStatus").classList.add("err");
+    $("runStatus").textContent = micReason(e);
+    $("runStatus").classList.add("err");
   }
 }
+function micReason(e){
+  if (window.self !== window.top) return "Blocked: running inside an embedded frame. Open the page in its own tab.";
+  if (!window.isSecureContext) return "Blocked: the microphone needs https or localhost. This page is on " + location.protocol;
+  if (e && e.name === "NotAllowedError") return "Permission denied. Allow the microphone in the browser settings and reload.";
+  if (e && e.name === "NotFoundError") return "No input device found.";
+  return "Microphone unavailable: " + (e && e.name ? e.name : "unknown error");
+}
 function stopMic(){
-  cancelAnimationFrame(S.mic.raf);
   if (S.mic.stream) S.mic.stream.getTracks().forEach(t => t.stop());
-  S.mic = { on: false, stream: null, analyser: null, buf: null, raf: 0, last: 0 };
+  S.mic = { on:false, stream:null, analyser:null, buf:null };
+  S.game.state = "idle";
   $("micBtn").textContent = "Turn on microphone";
-  $("noteVal").textContent = "—";
-  $("hzVal").textContent = "microphone off";
-  $("centsVal").textContent = "—";
-  trail.length = 0;
-  draw();
+  $("startBtn").disabled = true;
+  $("hudNote").textContent = "—"; $("hudCents").textContent = "";
+  showOverlay("Pitch run", "Sing the note on each wall. Your voice moves the ball: higher pitch lifts it, lower drops it.");
 }
 $("micBtn").onclick = toggleMic;
 
-/* ---- the loop ---- */
-const trail = [];
-const MAX_TRAIL = 150;
-let lastT = 0;
+/* ---- loop ---- */
+let raf = 0, prevT = 0, detT = 0, liveMidi = null;
 
-function loop(ts){
-  S.mic.raf = requestAnimationFrame(loop);
-  if (!S.mic.on) return;
-  if (ts - S.mic.last < 32) { draw(); return; }
-  const dt = Math.min(0.2, (ts - (lastT || ts)) / 1000);
-  lastT = ts;
-  S.mic.last = ts;
+function frame(ts){
+  raf = requestAnimationFrame(frame);
+  if (S.mode !== "run") return;
+  const dt = Math.min(0.05, (ts - (prevT || ts)) / 1000);
+  prevT = ts;
 
-  S.mic.analyser.getFloatTimeDomainData(S.mic.buf);
-  const res = detectPitch(S.mic.buf, ctx.sampleRate);
-
-  if (!res || res.clarity < 0.7){
-    trail.push(null);
-    $("noteVal").textContent = "—";
-    $("hzVal").textContent = "silence";
-    $("centsVal").textContent = "—";
-    $("centsVal").style.color = "var(--mute)";
-    if (!S.voice.done){
-      S.voice.held = Math.max(0, S.voice.held - dt * 0.7);
-      $("holdBar").style.width = (S.voice.held / HOLD_GOAL * 100) + "%";
-    }
-  } else {
-    const midi = freqToMidi(res.freq);
-    const pc = S.voice.targetPc;
-    const nearest = Math.round((midi - pc) / 12) * 12 + pc;
-    const cents = (midi - nearest) * 100;
-    trail.push(cents);
-    $("noteVal").textContent = noteName(midi);
-    $("hzVal").textContent = res.freq.toFixed(1) + " Hz";
-    $("centsVal").textContent = (cents > 0 ? "+" : "") + cents.toFixed(0);
-    const inTune = Math.abs(cents) <= S.tolerance;
-    $("centsVal").style.color = inTune ? "var(--amber)" : "var(--rose)";
-
-    if (!S.voice.done){
-      S.voice.held = inTune
-        ? Math.min(HOLD_GOAL, S.voice.held + dt)
-        : Math.max(0, S.voice.held - dt * 0.7);
-      $("holdBar").style.width = (S.voice.held / HOLD_GOAL * 100) + "%";
-      if (S.voice.held >= HOLD_GOAL) succeed();
+  if (S.mic.on && ts - detT > 30){
+    detT = ts;
+    S.mic.analyser.getFloatTimeDomainData(S.mic.buf);
+    const res = detectPitch(S.mic.buf, ctx.sampleRate);
+    if (res && res.clarity > 0.7){
+      liveMidi = freqToMidi(res.freq);
+      $("hudNote").textContent = noteLabel(liveMidi);
+      const c = (liveMidi - Math.round(liveMidi)) * 100;
+      $("hudCents").textContent = (c > 0 ? "+" : "") + c.toFixed(0) + "¢";
+    } else {
+      liveMidi = null;
+      $("hudNote").textContent = "—";
+      $("hudCents").textContent = "";
     }
   }
-  while (trail.length > MAX_TRAIL) trail.shift();
+
+  // ball physics
+  if (liveMidi !== null){
+    const target = yForMidi(liveMidi);
+    ball.y += (target - ball.y) * Math.min(1, dt * 14);
+  } else {
+    ball.y += 55 * dt;                       // drifts down in silence
+  }
+  ball.y = Math.max(6, Math.min(H - 6, ball.y));
+  ball.trail.push(ball.y);
+  if (ball.trail.length > 26) ball.trail.shift();
+
+  const G = S.game;
+  if (G.state === "count"){
+    G.countdown -= dt;
+    if (G.countdown <= 0){ G.state = "playing"; spawnWall(); }
+  } else if (G.state === "playing"){
+    const speed = W / CROSS_TIME;
+    const spacing = speed * WALL_GAP_T;
+    for (const w of G.walls) w.x -= speed * dt;
+
+    const ballX = W * BALL_X_FRAC;
+    const gapHalf = Math.max(11, (S.gapCents / 100 / SPAN) * H);
+
+    for (const w of G.walls){
+      if (w.resolved) continue;
+      const overlapping = w.x <= ballX + 9 && w.x + WALL_W >= ballX - 9;
+      if (overlapping){
+        const gapY = yForMidi(w.midi);
+        if (Math.abs(ball.y - gapY) > gapHalf){
+          w.resolved = true; w.hit = true;
+          S.streak = 0; S.tries++; refreshScore();
+          endRun();
+          break;
+        }
+      } else if (w.x + WALL_W < ballX - 9){
+        w.resolved = true;
+        G.cleared++; G.idx++; S.hits++; S.tries++; S.streak++;
+        refreshScore(); renderQueue();
+        playTone(midiToFreq(w.midi), 0.18, 0, 0.1);
+      }
+    }
+    G.walls = G.walls.filter(w => w.x > -WALL_W * 3);
+    const last = G.walls[G.walls.length - 1];
+    if (!last || W - last.x >= spacing) spawnWall();
+    if (G.idx >= G.seq.length){ G.state = "over"; showOverlay("Full run", "You cleared the whole sequence."); }
+  }
+
   draw();
 }
-
-function succeed(){
-  S.voice.done = true;
-  S.hits++; S.tries++; S.streak++;
-  refreshScore();
-  $("target").style.color = "var(--amber)";
-  $("holdText").textContent = "held — nice";
-  playTone(midiToFreq(S.voice.refMidi), 0.45);
-  setTimeout(newVoiceRound, 1300);
-}
-
-/* ============================================================
-   RIBBON — the pitch trail
-   ============================================================ */
-const cv = $("ribbon");
-const g = cv.getContext("2d");
-let W = 0, H = 0;
-
-function sizeCanvas(){
-  const r = cv.getBoundingClientRect();
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
-  W = r.width; H = r.height;
-  cv.width = W * dpr; cv.height = H * dpr;
-  g.setTransform(dpr, 0, 0, dpr, 0, 0);
-  draw();
-}
-window.addEventListener("resize", sizeCanvas);
-
-const RANGE = 70;                       // cents shown above and below the target
-const yFor = c => H / 2 - (Math.max(-RANGE, Math.min(RANGE, c)) / RANGE) * (H / 2 - 14);
 
 function draw(){
   g.clearRect(0, 0, W, H);
+  const ballX = W * BALL_X_FRAC;
 
-  // tolerance band
-  const yTop = yFor(S.tolerance), yBot = yFor(-S.tolerance);
-  g.fillStyle = "rgba(242,180,65,.07)";
-  g.fillRect(0, yTop, W, yBot - yTop);
-
-  // ± half-semitone guides
-  g.strokeStyle = "rgba(123,108,246,.28)";
-  g.lineWidth = 1;
-  g.setLineDash([3, 5]);
-  [50, -50].forEach(c => {
-    g.beginPath(); g.moveTo(0, yFor(c)); g.lineTo(W, yFor(c)); g.stroke();
-  });
-  g.setLineDash([]);
-
-  // target line
-  g.strokeStyle = "rgba(242,180,65,.85)";
-  g.lineWidth = 1.5;
-  g.beginPath(); g.moveTo(0, H / 2); g.lineTo(W, H / 2); g.stroke();
-
-  // labels
+  // scale guide lines
+  const notes = scaleMidis();
+  const base = 12 * (S.octave + 1) + S.tonicPc;
   g.font = "10px ui-monospace, Menlo, monospace";
-  g.fillStyle = "rgba(122,130,166,.85)";
-  g.fillText("sharp", 2, yFor(58));
-  g.fillText("flat", 2, yFor(-52));
-
-  // trail
-  const step = W / MAX_TRAIL;
-  let prevX = null, prevY = null;
-  for (let i = 0; i < trail.length; i++){
-    const c = trail[i];
-    const x = W - (trail.length - i) * step;
-    if (c === null){ prevX = null; continue; }
-    const y = yFor(c);
-    const age = i / trail.length;
-    const inTune = Math.abs(c) <= S.tolerance;
-    const col = inTune ? "242,180,65" : "224,96,126";
-    if (prevX !== null){
-      g.strokeStyle = "rgba(" + col + "," + (0.15 + age * 0.6).toFixed(3) + ")";
-      g.lineWidth = 2;
-      g.lineCap = "round";
-      g.beginPath(); g.moveTo(prevX, prevY); g.lineTo(x, y); g.stroke();
-    }
-    prevX = x; prevY = y;
+  for (const m of notes.concat([base + 12])){
+    const y = yForMidi(m);
+    if (y < 0 || y > H) continue;
+    g.strokeStyle = "rgba(123,108,246,.16)";
+    g.lineWidth = 1;
+    g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke();
+    g.fillStyle = "rgba(122,130,166,.7)";
+    g.fillText(syllable(((m % 12) + 12) % 12), 3, y - 3);
   }
-  // live head
-  if (prevX !== null){
-    g.fillStyle = "#EDEBE4";
-    g.beginPath(); g.arc(prevX, prevY, 4.5, 0, 7); g.fill();
+
+  // walls
+  const gapHalf = Math.max(11, (S.gapCents / 100 / SPAN) * H);
+  for (const w of S.game.walls){
+    const gapY = yForMidi(w.midi);
+    g.fillStyle = w.hit ? "rgba(224,96,126,.55)" : "rgba(43,50,82,.95)";
+    g.fillRect(w.x, 0, WALL_W, gapY - gapHalf);
+    g.fillRect(w.x, gapY + gapHalf, WALL_W, H - (gapY + gapHalf));
+    g.strokeStyle = w.hit ? "rgba(224,96,126,.9)" : "rgba(242,180,65,.85)";
+    g.lineWidth = 2;
+    g.beginPath(); g.moveTo(w.x, gapY - gapHalf); g.lineTo(w.x + WALL_W, gapY - gapHalf); g.stroke();
+    g.beginPath(); g.moveTo(w.x, gapY + gapHalf); g.lineTo(w.x + WALL_W, gapY + gapHalf); g.stroke();
+    g.fillStyle = "rgba(237,235,228,.9)";
+    g.font = "italic 600 14px Fraunces, Georgia, serif";
+    g.fillText(syllable(((w.midi % 12) + 12) % 12), w.x + WALL_W + 5, gapY + 5);
+  }
+
+  // ball trail
+  for (let i = 0; i < ball.trail.length; i++){
+    const a = i / ball.trail.length;
+    g.fillStyle = "rgba(242,180,65," + (a * 0.28).toFixed(3) + ")";
+    g.beginPath();
+    g.arc(ballX - (ball.trail.length - i) * 2.4, ball.trail[i], 3 + a * 4, 0, 7);
+    g.fill();
+  }
+  // ball
+  g.fillStyle = liveMidi === null ? "#7A82A6" : "#F2B441";
+  g.beginPath(); g.arc(ballX, ball.y, 9, 0, 7); g.fill();
+
+  // countdown
+  if (S.game.state === "count"){
+    g.fillStyle = "rgba(237,235,228,.9)";
+    g.font = "italic 600 46px Fraunces, Georgia, serif";
+    g.textAlign = "center";
+    g.fillText(String(Math.ceil(S.game.countdown)), W / 2, H / 2 + 14);
+    g.textAlign = "left";
   }
 }
 
@@ -615,38 +632,38 @@ function draw(){
 function setMode(m){
   S.mode = m;
   $("tab-ear").setAttribute("aria-selected", m === "ear");
-  $("tab-voice").setAttribute("aria-selected", m === "voice");
+  $("tab-run").setAttribute("aria-selected", m === "run");
   $("panel-ear").classList.toggle("hidden", m !== "ear");
-  $("panel-voice").classList.toggle("hidden", m !== "voice");
-  $("tolChip").style.display = m === "voice" ? "" : "none";
-  if (m === "voice") requestAnimationFrame(sizeCanvas);
-  else stopMic();
+  $("panel-run").classList.toggle("hidden", m !== "run");
+  $("gapChip").style.display = m === "run" ? "" : "none";
+  if (m === "run"){
+    requestAnimationFrame(() => { sizeCanvas(); ball.y = H / 2; renderQueue(); draw(); });
+  } else stopMic();
 }
 $("tab-ear").onclick = () => setMode("ear");
-$("tab-voice").onclick = () => { audio(); setMode("voice"); };
+$("tab-run").onclick = () => { audio(); setMode("run"); };
 
-$("doSystem").onchange = e => { S.system = e.target.value; buildAnswers(); refreshLabels(); };
-keySel.onchange = e => { S.tonicPc = +e.target.value; buildAnswers(); resetRounds(); };
-$("octave").onchange = e => { S.octave = +e.target.value; resetRounds(); };
-$("tolerance").onchange = e => { S.tolerance = +e.target.value; draw(); };
-
-function refreshLabels(){
-  if (S.voice.targetPc !== null)
-    $("target").firstChild.nodeValue = syllable(S.voice.targetPc, S.tonicPc, S.system);
-}
-function resetRounds(){
-  S.ear.targetMidi = null; S.ear.targetPc = null;
-  $("earPlay").textContent = "Play the pair";
+function resetAll(){
+  S.ear.midi = null;
+  $("earPlay").textContent = "Play a note";
   $("earRepeat").disabled = true;
-  newVoiceRound();
+  buildAnswers();
+  S.game.state = S.mic.on ? "idle" : "idle";
+  S.game.walls = []; S.game.seq = makeSequence(40); S.game.idx = 0; S.game.cleared = 0;
+  renderQueue();
+  if (S.mode === "run"){ showOverlay("Pitch run", "Scale changed. Tap Start run."); draw(); }
 }
+$("scale").onchange = e => { S.scale = e.target.value; fillKeys(); $("key").value = S.tonicPc; resetAll(); };
+$("key").onchange = e => { S.tonicPc = +e.target.value; resetAll(); };
+$("doSystem").onchange = e => { S.system = e.target.value; buildAnswers(); renderQueue(); };
+$("octave").onchange = e => { S.octave = +e.target.value; resetAll(); };
+$("gap").onchange = e => { S.gapCents = +e.target.value; };
 
 buildAnswers();
-newVoiceRound();
+S.game.seq = makeSequence(40);
 refreshScore();
 setMode("ear");
-$("hzVal").textContent = "microphone off";
-sizeCanvas();
+raf = requestAnimationFrame(frame);
 </script>
 </body>
 </html>
