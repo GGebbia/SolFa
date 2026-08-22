@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Solfa — ear and voice training</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..800&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E1220;
+  --panel:#171C30;
+  --panel-2:#1F2540;
+  --line:#2B3252;
+  --text:#EDEBE4;
+  --mute:#7A82A6;
+  --amber:#F2B441;
+  --rose:#E0607E;
+  --violet:#7B6CF6;
+  --teal:#4FD1C5;
+  --display:"Fraunces","Iowan Old Style",Georgia,serif;
+  --body:"Inter Tight","Helvetica Neue",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(120% 60% at 50% -10%, #1B2140 0%, rgba(27,33,64,0) 60%),
+    var(--ink);
+  color:var(--text);
+  font-family:var(--body);
+  font-size:16px;
+  line-height:1.45;
+  min-height:100dvh;
+  padding:max(14px,env(safe-area-inset-top)) 14px max(20px,env(safe-area-inset-bottom));
+  overflow-x:hidden;
+}
+.wrap{max-width:520px;margin:0 auto}
+
+/* ---- header ---- */
+.top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}
+.brand{font-family:var(--display);font-optical-sizing:auto;font-weight:600;font-size:26px;letter-spacing:-0.02em}
+.brand em{font-style:italic;color:var(--amber)}
+.score{font-family:var(--mono);font-size:12px;color:var(--mute);text-align:right}
+.score b{color:var(--text);font-weight:600}
+
+/* ---- tabs ---- */
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:5px;margin-bottom:12px}
+.tab{appearance:none;border:0;background:transparent;color:var(--mute);font-family:var(--body);font-size:15px;font-weight:500;padding:10px 8px;border-radius:10px;cursor:pointer;transition:background .18s,color .18s}
+.tab[aria-selected="true"]{background:var(--panel-2);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
+
+/* ---- settings chips ---- */
+.settings{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.chip{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 6px 5px 11px}
+.chip>span{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--mute)}
+.chip select{appearance:none;border:0;background:var(--panel-2);color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 9px;border-radius:999px;cursor:pointer}
+.chip select:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+
+/* ---- cards ---- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin-bottom:12px}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 10px}
+.hidden{display:none !important}
+
+/* ---- big syllable ---- */
+.syllable{font-family:var(--display);font-style:italic;font-weight:600;font-size:clamp(52px,17vw,80px);line-height:.95;letter-spacing:-.03em;margin:0;transition:color .2s}
+.syllable small{display:block;font-family:var(--mono);font-style:normal;font-size:12px;font-weight:400;letter-spacing:.08em;color:var(--mute);margin-top:10px}
+.prompt-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+
+/* ---- buttons ---- */
+.btn{appearance:none;font-family:var(--body);font-size:15px;font-weight:500;border-radius:12px;padding:13px 16px;cursor:pointer;border:1px solid var(--line);background:var(--panel-2);color:var(--text);transition:transform .1s,background .18s,border-color .18s}
+.btn:active{transform:scale(.975)}
+.btn:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+.btn.primary{background:var(--violet);border-color:var(--violet);color:#fff}
+.btn.ghost{background:transparent}
+.btn[disabled]{opacity:.42;cursor:not-allowed}
+.btn-row{display:flex;gap:8px;margin-top:14px}
+.btn-row .btn{flex:1}
+
+/* ---- answer grid ---- */
+.answers{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:16px}
+.ans{appearance:none;border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:12px;padding:14px 4px;cursor:pointer;font-family:var(--display);font-style:italic;font-weight:600;font-size:19px;transition:background .15s,border-color .15s,transform .1s}
+.ans:active{transform:scale(.96)}
+.ans:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+.ans.right{background:rgba(242,180,65,.16);border-color:var(--amber);color:var(--amber)}
+.ans.wrong{background:rgba(224,96,126,.14);border-color:var(--rose);color:var(--rose)}
+.ans[disabled]{cursor:default}
+
+/* ---- ribbon (signature) ---- */
+.ribbon-wrap{position:relative;margin:6px -16px 0;padding:0 16px}
+canvas{display:block;width:100%;height:230px;touch-action:none}
+.readout{position:absolute;top:8px;right:22px;text-align:right;font-family:var(--mono);font-size:11px;color:var(--mute);pointer-events:none}
+.readout b{display:block;font-size:22px;font-weight:600;color:var(--text);letter-spacing:-.01em}
+.cents{position:absolute;top:8px;left:22px;font-family:var(--mono);font-size:11px;color:var(--mute);pointer-events:none}
+.cents b{display:block;font-size:22px;font-weight:600;letter-spacing:-.01em;color:var(--mute)}
+.hold{height:5px;border-radius:99px;background:var(--panel-2);overflow:hidden;margin-top:12px}
+.hold i{display:block;height:100%;width:0;background:var(--amber);border-radius:99px;transition:width .08s linear}
+.holdlabel{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-top:7px}
+
+/* ---- status / notes ---- */
+.note{font-size:13.5px;color:var(--mute);margin:12px 0 0}
+.note strong{color:var(--text);font-weight:500}
+.status{font-family:var(--mono);font-size:12px;color:var(--mute);margin-top:12px}
+.status.err{color:var(--rose)}
+.foot{font-size:11.5px;color:var(--mute);text-align:center;margin-top:18px;line-height:1.6}
+
+@media (prefers-reduced-motion: reduce){
+  *{transition:none !important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="brand">Sol<em>fa</em></div>
+    <div class="score">streak <b id="streak">0</b> · <b id="hits">0</b>/<b id="tries">0</b></div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" id="tab-ear" role="tab" aria-selected="true">Ear</button>
+    <button class="tab" id="tab-voice" role="tab" aria-selected="false">Voice</button>
+  </div>
+
+  <div class="settings">
+    <label class="chip"><span>Do</span>
+      <select id="doSystem">
+        <option value="movable">movable</option>
+        <option value="fixed">fixed</option>
+      </select>
+    </label>
+    <label class="chip"><span>Key</span>
+      <select id="key"></select>
+    </label>
+    <label class="chip"><span>Range</span>
+      <select id="octave">
+        <option value="3">low</option>
+        <option value="4" selected>high</option>
+      </select>
+    </label>
+    <label class="chip" id="tolChip"><span>Tolerance</span>
+      <select id="tolerance">
+        <option value="50">±50¢</option>
+        <option value="30" selected>±30¢</option>
+        <option value="15">±15¢</option>
+      </select>
+    </label>
+  </div>
+
+  <!-- ============ EAR ============ -->
+  <section id="panel-ear">
+    <div class="card">
+      <p class="eyebrow">Name the note</p>
+      <p class="note" id="earPrompt">Solfa plays the tonic, then one note of the scale. Name the second one.</p>
+      <div class="btn-row">
+        <button class="btn primary" id="earPlay">Play the pair</button>
+        <button class="btn ghost" id="earRepeat" disabled>Repeat</button>
+      </div>
+      <div class="answers" id="earAnswers"></div>
+      <p class="status" id="earStatus">Ready when you are.</p>
+    </div>
+  </section>
+
+  <!-- ============ VOICE ============ -->
+  <section id="panel-voice" class="hidden">
+    <div class="card">
+      <div class="prompt-row">
+        <h1 class="syllable" id="target">do<small id="targetNote">C</small></h1>
+        <button class="btn ghost" id="hearIt">Hear it</button>
+      </div>
+
+      <div class="ribbon-wrap">
+        <canvas id="ribbon"></canvas>
+        <div class="cents"><b id="centsVal">—</b>cents</div>
+        <div class="readout"><b id="noteVal">—</b><span id="hzVal">silence</span></div>
+      </div>
+
+      <div class="hold"><i id="holdBar"></i></div>
+      <div class="holdlabel"><span id="holdText">hold on pitch</span><span id="holdGoal">1.2 s</span></div>
+
+      <div class="btn-row">
+        <button class="btn primary" id="micBtn">Turn on microphone</button>
+        <button class="btn ghost" id="skipBtn">Skip</button>
+      </div>
+      <p class="status" id="voiceStatus">Any octave counts — sing it where it sits comfortably.</p>
+    </div>
+  </section>
+
+  <p class="foot">Headphones help: speaker sound leaking into the microphone confuses the detector.</p>
+</div>
+
+<script>
+/* ============================================================
+   MUSIC
+   ============================================================ */
+const NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const FIXED = ["do","do♯","re","re♯","mi","fa","fa♯","sol","sol♯","la","la♯","si"];
+const MOVABLE = ["do","di","re","ri","mi","fa","fi","sol","si","la","li","ti"];
+const MAJOR = [0,2,4,5,7,9,11];
+
+const midiToFreq = m => 440 * Math.pow(2, (m - 69) / 12);
+const freqToMidi = f => 69 + 12 * Math.log2(f / 440);
+
+function syllable(pc, tonicPc, system){
+  if (system === "fixed") return FIXED[((pc % 12) + 12) % 12];
+  return MOVABLE[(((pc - tonicPc) % 12) + 12) % 12];
+}
+function noteName(midi){
+  return NAMES[((Math.round(midi) % 12) + 12) % 12] + (Math.floor(Math.round(midi) / 12) - 1);
+}
+
+/* ============================================================
+   AUDIO
+   ============================================================ */
+let ctx = null;
+function audio(){
+  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+  if (ctx.state === "suspended") ctx.resume();
+  return ctx;
+}
+function playTone(freq, dur = 0.75, delay = 0){
+  const a = audio();
+  const t = a.currentTime + delay;
+  const osc = a.createOscillator();
+  const gain = a.createGain();
+  const filt = a.createBiquadFilter();
+  filt.type = "lowpass";
+  filt.frequency.value = Math.min(6000, freq * 6);
+  osc.type = "triangle";
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(0.22, t + 0.02);
+  gain.gain.setValueAtTime(0.22, t + dur - 0.15);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  osc.connect(filt); filt.connect(gain); gain.connect(a.destination);
+  osc.start(t); osc.stop(t + dur + 0.05);
+}
+
+/* ============================================================
+   PITCH DETECTION — normalised square difference (McLeod)
+   ============================================================ */
+function detectPitch(buf, sr){
+  const SIZE = buf.length;
+  let rms = 0;
+  for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+  rms = Math.sqrt(rms / SIZE);
+  if (rms < 0.008) return null;
+
+  const minLag = Math.max(2, Math.floor(sr / 1100));
+  const maxLag = Math.min(Math.floor(sr / 65), SIZE >> 1);
+  const nsdf = new Float32Array(maxLag + 2);
+
+  for (let lag = minLag; lag <= maxLag; lag++){
+    let r = 0, m = 0;
+    for (let i = 0, n = SIZE - lag; i < n; i++){
+      const a = buf[i], b = buf[i + lag];
+      r += a * b;
+      m += a * a + b * b;
+    }
+    nsdf[lag] = m > 0 ? (2 * r) / m : 0;
+  }
+
+  // collect local maxima of each positive region
+  const peaks = [];
+  let lag = minLag;
+  while (lag <= maxLag && nsdf[lag] > 0) lag++;   // skip the region attached to lag 0
+  while (lag <= maxLag){
+    if (nsdf[lag] > 0){
+      let pl = lag, pv = nsdf[lag];
+      while (lag <= maxLag && nsdf[lag] > 0){
+        if (nsdf[lag] > pv){ pv = nsdf[lag]; pl = lag; }
+        lag++;
+      }
+      peaks.push([pl, pv]);
+    } else lag++;
+  }
+  if (!peaks.length) return null;
+
+  let best = 0;
+  for (const p of peaks) if (p[1] > best) best = p[1];
+  if (best < 0.55) return null;
+  const chosen = peaks.find(p => p[1] >= 0.88 * best);
+  if (!chosen) return null;
+
+  const [pl, pv] = chosen;
+  const y0 = nsdf[pl - 1] || pv, y1 = pv, y2 = nsdf[pl + 1] || pv;
+  const denom = 2 * (2 * y1 - y0 - y2);
+  const shift = denom !== 0 ? (y2 - y0) / denom : 0;
+  const freq = sr / (pl + Math.max(-1, Math.min(1, shift)));
+  if (freq < 65 || freq > 1100) return null;
+  return { freq, clarity: pv };
+}
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const S = {
+  mode: "ear",
+  tonicPc: 0,
+  system: "movable",
+  octave: 4,
+  tolerance: 30,
+  streak: 0, hits: 0, tries: 0,
+  ear: { targetPc: null, targetMidi: null, answered: false },
+  voice: { targetPc: null, held: 0, done: false },
+  mic: { on: false, stream: null, analyser: null, buf: null, raf: 0, last: 0 }
+};
+const HOLD_GOAL = 1.2;
+
+const $ = id => document.getElementById(id);
+
+/* ---- settings ---- */
+const keySel = $("key");
+NAMES.forEach((n, i) => {
+  const o = document.createElement("option");
+  o.value = i; o.textContent = n;
+  keySel.appendChild(o);
+});
+keySel.value = "0";
+
+function scaleMidis(){
+  const base = 12 * (S.octave + 1) + S.tonicPc;
+  return MAJOR.map(iv => base + iv);
+}
+function refreshScore(){
+  $("streak").textContent = S.streak;
+  $("hits").textContent = S.hits;
+  $("tries").textContent = S.tries;
+}
+
+/* ============================================================
+   EAR CHALLENGE
+   ============================================================ */
+function buildAnswers(){
+  const grid = $("earAnswers");
+  grid.innerHTML = "";
+  scaleMidis().forEach(m => {
+    const pc = m % 12;
+    const b = document.createElement("button");
+    b.className = "ans";
+    b.textContent = syllable(pc, S.tonicPc, S.system);
+    b.dataset.pc = pc;
+    b.onclick = () => answerEar(pc, b);
+    grid.appendChild(b);
+  });
+}
+function newEarRound(){
+  const notes = scaleMidis();
+  let m;
+  do { m = notes[Math.floor(Math.random() * notes.length)]; }
+  while (m === S.ear.targetMidi && notes.length > 1);
+  S.ear.targetMidi = m;
+  S.ear.targetPc = m % 12;
+  S.ear.answered = false;
+  [...$("earAnswers").children].forEach(b => {
+    b.classList.remove("right", "wrong");
+    b.disabled = false;
+  });
+  $("earStatus").textContent = "Listening room is yours.";
+  $("earStatus").classList.remove("err");
+  playEarPair();
+}
+function playEarPair(){
+  const tonic = midiToFreq(12 * (S.octave + 1) + S.tonicPc);
+  playTone(tonic, 0.65, 0);
+  playTone(midiToFreq(S.ear.targetMidi), 0.9, 0.85);
+  $("earRepeat").disabled = false;
+  $("earPlay").textContent = "New note";
+}
+function answerEar(pc, btn){
+  if (S.ear.answered || S.ear.targetPc === null) return;
+  S.ear.answered = true;
+  S.tries++;
+  const correct = pc === S.ear.targetPc;
+  [...$("earAnswers").children].forEach(b => {
+    b.disabled = true;
+    if (+b.dataset.pc === S.ear.targetPc) b.classList.add("right");
+  });
+  if (correct){
+    S.hits++; S.streak++;
+    $("earStatus").textContent = "Correct. Next one in a moment.";
+    $("earStatus").classList.remove("err");
+    playTone(midiToFreq(S.ear.targetMidi), 0.5);
+    setTimeout(newEarRound, 1100);
+  } else {
+    S.streak = 0;
+    btn.classList.add("wrong");
+    const right = syllable(S.ear.targetPc, S.tonicPc, S.system);
+    $("earStatus").textContent = "It was " + right + " — play it again and listen for the distance.";
+    $("earStatus").classList.add("err");
+  }
+  refreshScore();
+}
+$("earPlay").onclick = () => { audio(); newEarRound(); };
+$("earRepeat").onclick = () => { if (S.ear.targetMidi !== null) playEarPair(); };
+
+/* ============================================================
+   VOICE CHALLENGE
+   ============================================================ */
+function newVoiceRound(){
+  const notes = scaleMidis();
+  let m;
+  do { m = notes[Math.floor(Math.random() * notes.length)]; }
+  while (m % 12 === S.voice.targetPc && notes.length > 1);
+  S.voice.targetPc = m % 12;
+  S.voice.refMidi = m;
+  S.voice.held = 0;
+  S.voice.done = false;
+  trail.length = 0;
+  $("target").firstChild.nodeValue = syllable(S.voice.targetPc, S.tonicPc, S.system);
+  $("targetNote").textContent = NAMES[S.voice.targetPc] + " · any octave";
+  $("target").style.color = "";
+  $("holdText").textContent = "hold on pitch";
+  $("holdBar").style.width = "0%";
+  if (S.mode === "voice") setTimeout(() => playTone(midiToFreq(m), 0.8), 250);
+}
+$("hearIt").onclick = () => { audio(); playTone(midiToFreq(S.voice.refMidi), 0.8); };
+$("skipBtn").onclick = () => { S.streak = 0; refreshScore(); newVoiceRound(); };
+
+function micReason(e){
+  if (window.self !== window.top)
+    return "Blocked: this page is running inside an embedded preview frame, which is not granted microphone permission. Save the file and open it on its own over https.";
+  if (!window.isSecureContext)
+    return "Blocked: browsers only expose the microphone over https or on localhost. This page is on " + location.protocol;
+  if (e && e.name === "NotAllowedError")
+    return "Permission denied. Allow the microphone for this site in the browser settings and reload.";
+  if (e && e.name === "NotFoundError")
+    return "No input device found.";
+  return "Microphone unavailable: " + (e && e.name ? e.name : "unknown error");
+}
+
+async function toggleMic(){
+  if (S.mic.on){ stopMic(); return; }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    $("voiceStatus").textContent = micReason(null);
+    $("voiceStatus").classList.add("err");
+    return;
+  }
+  try {
+    audio();
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+    });
+    const a = audio();
+    const src = a.createMediaStreamSource(stream);
+    const hp = a.createBiquadFilter();
+    hp.type = "highpass"; hp.frequency.value = 60;
+    const an = a.createAnalyser();
+    an.fftSize = 2048;
+    src.connect(hp); hp.connect(an);
+    S.mic = { on: true, stream, analyser: an, buf: new Float32Array(an.fftSize), raf: 0, last: 0 };
+    $("micBtn").textContent = "Turn off microphone";
+    $("voiceStatus").textContent = "Listening. Any octave counts.";
+    $("voiceStatus").classList.remove("err");
+    loop();
+  } catch (e){
+    $("voiceStatus").textContent = micReason(e);
+    $("voiceStatus").classList.add("err");
+  }
+}
+function stopMic(){
+  cancelAnimationFrame(S.mic.raf);
+  if (S.mic.stream) S.mic.stream.getTracks().forEach(t => t.stop());
+  S.mic = { on: false, stream: null, analyser: null, buf: null, raf: 0, last: 0 };
+  $("micBtn").textContent = "Turn on microphone";
+  $("noteVal").textContent = "—";
+  $("hzVal").textContent = "microphone off";
+  $("centsVal").textContent = "—";
+  trail.length = 0;
+  draw();
+}
+$("micBtn").onclick = toggleMic;
+
+/* ---- the loop ---- */
+const trail = [];
+const MAX_TRAIL = 150;
+let lastT = 0;
+
+function loop(ts){
+  S.mic.raf = requestAnimationFrame(loop);
+  if (!S.mic.on) return;
+  if (ts - S.mic.last < 32) { draw(); return; }
+  const dt = Math.min(0.2, (ts - (lastT || ts)) / 1000);
+  lastT = ts;
+  S.mic.last = ts;
+
+  S.mic.analyser.getFloatTimeDomainData(S.mic.buf);
+  const res = detectPitch(S.mic.buf, ctx.sampleRate);
+
+  if (!res || res.clarity < 0.7){
+    trail.push(null);
+    $("noteVal").textContent = "—";
+    $("hzVal").textContent = "silence";
+    $("centsVal").textContent = "—";
+    $("centsVal").style.color = "var(--mute)";
+    if (!S.voice.done){
+      S.voice.held = Math.max(0, S.voice.held - dt * 0.7);
+      $("holdBar").style.width = (S.voice.held / HOLD_GOAL * 100) + "%";
+    }
+  } else {
+    const midi = freqToMidi(res.freq);
+    const pc = S.voice.targetPc;
+    const nearest = Math.round((midi - pc) / 12) * 12 + pc;
+    const cents = (midi - nearest) * 100;
+    trail.push(cents);
+    $("noteVal").textContent = noteName(midi);
+    $("hzVal").textContent = res.freq.toFixed(1) + " Hz";
+    $("centsVal").textContent = (cents > 0 ? "+" : "") + cents.toFixed(0);
+    const inTune = Math.abs(cents) <= S.tolerance;
+    $("centsVal").style.color = inTune ? "var(--amber)" : "var(--rose)";
+
+    if (!S.voice.done){
+      S.voice.held = inTune
+        ? Math.min(HOLD_GOAL, S.voice.held + dt)
+        : Math.max(0, S.voice.held - dt * 0.7);
+      $("holdBar").style.width = (S.voice.held / HOLD_GOAL * 100) + "%";
+      if (S.voice.held >= HOLD_GOAL) succeed();
+    }
+  }
+  while (trail.length > MAX_TRAIL) trail.shift();
+  draw();
+}
+
+function succeed(){
+  S.voice.done = true;
+  S.hits++; S.tries++; S.streak++;
+  refreshScore();
+  $("target").style.color = "var(--amber)";
+  $("holdText").textContent = "held — nice";
+  playTone(midiToFreq(S.voice.refMidi), 0.45);
+  setTimeout(newVoiceRound, 1300);
+}
+
+/* ============================================================
+   RIBBON — the pitch trail
+   ============================================================ */
+const cv = $("ribbon");
+const g = cv.getContext("2d");
+let W = 0, H = 0;
+
+function sizeCanvas(){
+  const r = cv.getBoundingClientRect();
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  W = r.width; H = r.height;
+  cv.width = W * dpr; cv.height = H * dpr;
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  draw();
+}
+window.addEventListener("resize", sizeCanvas);
+
+const RANGE = 70;                       // cents shown above and below the target
+const yFor = c => H / 2 - (Math.max(-RANGE, Math.min(RANGE, c)) / RANGE) * (H / 2 - 14);
+
+function draw(){
+  g.clearRect(0, 0, W, H);
+
+  // tolerance band
+  const yTop = yFor(S.tolerance), yBot = yFor(-S.tolerance);
+  g.fillStyle = "rgba(242,180,65,.07)";
+  g.fillRect(0, yTop, W, yBot - yTop);
+
+  // ± half-semitone guides
+  g.strokeStyle = "rgba(123,108,246,.28)";
+  g.lineWidth = 1;
+  g.setLineDash([3, 5]);
+  [50, -50].forEach(c => {
+    g.beginPath(); g.moveTo(0, yFor(c)); g.lineTo(W, yFor(c)); g.stroke();
+  });
+  g.setLineDash([]);
+
+  // target line
+  g.strokeStyle = "rgba(242,180,65,.85)";
+  g.lineWidth = 1.5;
+  g.beginPath(); g.moveTo(0, H / 2); g.lineTo(W, H / 2); g.stroke();
+
+  // labels
+  g.font = "10px ui-monospace, Menlo, monospace";
+  g.fillStyle = "rgba(122,130,166,.85)";
+  g.fillText("sharp", 2, yFor(58));
+  g.fillText("flat", 2, yFor(-52));
+
+  // trail
+  const step = W / MAX_TRAIL;
+  let prevX = null, prevY = null;
+  for (let i = 0; i < trail.length; i++){
+    const c = trail[i];
+    const x = W - (trail.length - i) * step;
+    if (c === null){ prevX = null; continue; }
+    const y = yFor(c);
+    const age = i / trail.length;
+    const inTune = Math.abs(c) <= S.tolerance;
+    const col = inTune ? "242,180,65" : "224,96,126";
+    if (prevX !== null){
+      g.strokeStyle = "rgba(" + col + "," + (0.15 + age * 0.6).toFixed(3) + ")";
+      g.lineWidth = 2;
+      g.lineCap = "round";
+      g.beginPath(); g.moveTo(prevX, prevY); g.lineTo(x, y); g.stroke();
+    }
+    prevX = x; prevY = y;
+  }
+  // live head
+  if (prevX !== null){
+    g.fillStyle = "#EDEBE4";
+    g.beginPath(); g.arc(prevX, prevY, 4.5, 0, 7); g.fill();
+  }
+}
+
+/* ============================================================
+   WIRING
+   ============================================================ */
+function setMode(m){
+  S.mode = m;
+  $("tab-ear").setAttribute("aria-selected", m === "ear");
+  $("tab-voice").setAttribute("aria-selected", m === "voice");
+  $("panel-ear").classList.toggle("hidden", m !== "ear");
+  $("panel-voice").classList.toggle("hidden", m !== "voice");
+  $("tolChip").style.display = m === "voice" ? "" : "none";
+  if (m === "voice") requestAnimationFrame(sizeCanvas);
+  else stopMic();
+}
+$("tab-ear").onclick = () => setMode("ear");
+$("tab-voice").onclick = () => { audio(); setMode("voice"); };
+
+$("doSystem").onchange = e => { S.system = e.target.value; buildAnswers(); refreshLabels(); };
+keySel.onchange = e => { S.tonicPc = +e.target.value; buildAnswers(); resetRounds(); };
+$("octave").onchange = e => { S.octave = +e.target.value; resetRounds(); };
+$("tolerance").onchange = e => { S.tolerance = +e.target.value; draw(); };
+
+function refreshLabels(){
+  if (S.voice.targetPc !== null)
+    $("target").firstChild.nodeValue = syllable(S.voice.targetPc, S.tonicPc, S.system);
+}
+function resetRounds(){
+  S.ear.targetMidi = null; S.ear.targetPc = null;
+  $("earPlay").textContent = "Play the pair";
+  $("earRepeat").disabled = true;
+  newVoiceRound();
+}
+
+buildAnswers();
+newVoiceRound();
+refreshScore();
+setMode("ear");
+$("hzVal").textContent = "microphone off";
+sizeCanvas();
+</script>
+</body>
+</html>
