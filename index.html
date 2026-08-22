@@ -390,6 +390,19 @@ $("earTonic").onclick = () => { audio(); playTone(midiToFreq(12 * (S.octave + 1)
 /* ============================================================
    CURSA — pentagrama
    ============================================================ */
+/* Claus dibuixades a mà. Unitat = 1 espai de pentagrama.
+   L'origen (0,0) és la línia que la clau anomena: sol per la de sol, fa per la de fa. */
+const CLEF_G = new Path2D(
+  "M 0.42,-3.10 C 0.42,-3.56 0.05,-3.74 -0.28,-3.54 C -0.62,-3.34 -0.80,-2.92 -0.80,-2.45 " +
+  "C -0.80,-1.95 -0.55,-1.55 -0.15,-1.20 C 0.45,-0.70 1.10,-0.45 1.10,0.05 " +
+  "C 1.10,0.68 0.58,1.08 0.00,1.08 C -0.62,1.08 -1.08,0.65 -1.08,0.05 " +
+  "C -1.08,-0.42 -0.72,-0.72 -0.28,-0.72 C 0.12,-0.72 0.40,-0.45 0.40,-0.12 " +
+  "C 0.40,0.15 0.20,0.30 -0.04,0.30 " +
+  "M 0.42,-3.10 C 0.40,-2.20 0.22,-0.60 0.10,0.55 C 0.02,1.50 -0.02,2.15 -0.30,2.55 " +
+  "C -0.62,2.95 -1.02,2.72 -0.92,2.28"
+);
+const CLEF_F = new Path2D("M 0.02,-0.36 C 0.62,-0.52 0.84,-0.15 0.84,0.36 C 0.84,1.14 0.16,1.86 -0.82,2.16");
+
 const cv = $("game"), g = cv.getContext("2d");
 let W = 0, H = 0, L = 30;
 const BALL_X_FRAC = 0.30;
@@ -551,7 +564,7 @@ function frame(ts){
         playTone(midiToFreq(n.midi), 0.16, 0, 0.09);
       }
     }
-    G.notes = G.notes.filter(n => n.x > -60);
+    G.notes = G.notes.filter(n => n.x > 20);
     const last = G.notes[G.notes.length - 1];
     if (!last || W - last.x >= spacing) spawnNote();
     if (G.idx >= G.seq.length){ G.state = "over"; showOverlay("Cursa completa", "Has passat tota la seqüència."); }
@@ -586,11 +599,26 @@ function draw(){
     g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke();
   }
 
-  // clau
-  g.fillStyle = "rgba(237,235,228,.75)";
-  g.font = (L * 3.2) + "px 'Noto Music', serif";
-  g.textAlign = "left";
-  g.fillText(isBass() ? "\uD834\uDD22" : "\uD834\uDD1E", 4, yForPos(refPos() + (isBass() ? 1.2 : -0.6)));
+  // clau — ancorada a la línia que anomena
+  g.save();
+  if (isBass()){
+    g.translate(28, yForPos(refPos() + 2));      // fa3 = 2a línia des de dalt
+    g.scale(L, L);
+    g.strokeStyle = "rgba(237,235,228,.8)";
+    g.lineWidth = 0.19; g.lineCap = "round";
+    g.stroke(CLEF_F);
+    g.fillStyle = "rgba(237,235,228,.8)";
+    g.beginPath(); g.arc(0, -0.05, 0.33, 0, 7); g.fill();
+    g.beginPath(); g.arc(1.20, -0.5, 0.16, 0, 7); g.fill();
+    g.beginPath(); g.arc(1.20,  0.5, 0.16, 0, 7); g.fill();
+  } else {
+    g.translate(30, yForPos(refPos() - 2));      // sol4 = 2a línia des de baix
+    g.scale(L, L);
+    g.strokeStyle = "rgba(237,235,228,.8)";
+    g.lineWidth = 0.155; g.lineCap = "round";
+    g.stroke(CLEF_G);
+  }
+  g.restore();
 
   // capçal de lectura
   g.strokeStyle = "rgba(123,108,246,.5)";
@@ -600,6 +628,9 @@ function draw(){
 
   // notes
   for (const n of S.game.notes){
+    const fade = Math.max(0, Math.min(1, (n.x - 34) / 60));
+    if (fade <= 0) continue;
+    g.globalAlpha = fade;
     const hp = headPos(n.midi);
     const hy = yForPos(hp.pos);
     const ty = yForMidi(n.midi);
@@ -669,6 +700,7 @@ function draw(){
       g.fillText(syllable(((n.midi % 12) + 12) % 12), n.x, ty + half + 15);
       g.textAlign = "left";
     }
+    g.globalAlpha = 1;
   }
 
   // rastre de la bola
