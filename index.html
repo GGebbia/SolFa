@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ca">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0E1220">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Solfa — ear and voice training</title>
+<title>Solfa — entrenament d'oïda i veu</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..800&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..800&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Noto+Music&display=swap" rel="stylesheet">
 <style>
 :root{
   --ink:#0E1220;
@@ -44,11 +44,20 @@ body{
 .tab{border:0;background:transparent;color:var(--mute);font-family:var(--body);font-size:15px;font-weight:500;padding:10px 8px;border-radius:10px;cursor:pointer}
 .tab[aria-selected="true"]{background:var(--panel-2);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
 
-.settings{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.settings{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .chip{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 6px 5px 11px}
 .chip>span{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--mute)}
 .chip select{appearance:none;border:0;background:var(--panel-2);color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 9px;border-radius:999px;cursor:pointer;max-width:42vw}
 .chip select:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+
+.slider{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:9px 14px;margin-bottom:10px}
+.slider span{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--mute);flex:0 0 auto}
+.slider output{font-family:var(--mono);font-size:12px;color:var(--text);flex:0 0 auto;min-width:52px;text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:22px;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:99px;background:var(--panel-2)}
+input[type=range]::-moz-range-track{height:4px;border-radius:99px;background:var(--panel-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;border-radius:50%;background:var(--amber);margin-top:-7.5px;border:0}
+input[type=range]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;background:var(--amber);border:0}
 
 .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:10px}
 .eyebrow{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 10px}
@@ -70,17 +79,13 @@ body{
 .ans.right{background:rgba(242,180,65,.16);border-color:var(--amber);color:var(--amber)}
 .ans.wrong{background:rgba(224,96,126,.14);border-color:var(--rose);color:var(--rose)}
 
-.queue{display:flex;gap:6px;align-items:center;overflow:hidden;margin-bottom:8px;height:38px}
-.qnote{flex:0 0 auto;font-family:var(--display);font-style:italic;font-weight:600;font-size:17px;padding:4px 11px;border-radius:9px;background:var(--panel-2);color:var(--mute);border:1px solid var(--line)}
-.qnote.now{background:rgba(242,180,65,.16);border-color:var(--amber);color:var(--amber)}
-
-.field{position:relative;margin:0 -16px;padding:0 12px}
-canvas{display:block;width:100%;height:min(46vh,340px);touch-action:none}
-.hud{position:absolute;top:6px;left:20px;font-family:var(--mono);font-size:11px;color:var(--mute);pointer-events:none}
+.field{position:relative;margin:0 -16px;padding:0 10px}
+canvas{display:block;width:100%;height:min(44vh,320px);touch-action:none}
+.hud{position:absolute;top:4px;right:18px;font-family:var(--mono);font-size:11px;color:var(--mute);pointer-events:none}
 .hud b{color:var(--text);font-weight:600}
-.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;background:rgba(14,18,32,.72);border-radius:14px}
-.overlay h2{font-family:var(--display);font-style:italic;font-weight:600;font-size:34px;margin:0;letter-spacing:-.02em}
-.overlay p{margin:0;font-size:13.5px;color:var(--mute);max-width:76%}
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;background:rgba(14,18,32,.74);border-radius:14px}
+.overlay h2{font-family:var(--display);font-style:italic;font-weight:600;font-size:32px;margin:0;letter-spacing:-.02em}
+.overlay p{margin:0;font-size:13.5px;color:var(--mute);max-width:78%}
 
 .status{font-family:var(--mono);font-size:12px;color:var(--mute);margin-top:12px}
 .status.err{color:var(--rose)}
@@ -93,97 +98,106 @@ canvas{display:block;width:100%;height:min(46vh,340px);touch-action:none}
 
   <div class="top">
     <div class="brand">Sol<em>fa</em></div>
-    <div class="score" id="scoreBox">streak <b id="streak">0</b> · <b id="hits">0</b>/<b id="tries">0</b></div>
+    <div class="score">ratxa <b id="streak">0</b> · <b id="hits">0</b>/<b id="tries">0</b></div>
   </div>
 
   <div class="tabs" role="tablist">
-    <button class="tab" id="tab-ear" role="tab" aria-selected="true">Ear</button>
-    <button class="tab" id="tab-run" role="tab" aria-selected="false">Run</button>
+    <button class="tab" id="tab-ear" role="tab" aria-selected="true">Oïda</button>
+    <button class="tab" id="tab-run" role="tab" aria-selected="false">Cursa</button>
   </div>
 
   <div class="settings">
-    <label class="chip"><span>Scale</span><select id="scale"></select></label>
-    <label class="chip"><span>Key</span><select id="key"></select></label>
+    <label class="chip"><span>Escala</span><select id="scale"></select></label>
+    <label class="chip"><span>Tonalitat</span><select id="key"></select></label>
     <label class="chip"><span>Do</span>
-      <select id="doSystem"><option value="movable">movable</option><option value="fixed">fixed</option></select>
+      <select id="doSystem"><option value="movable">mòbil</option><option value="fixed">fix</option></select>
     </label>
-    <label class="chip"><span>Range</span>
-      <select id="octave"><option value="2">bass</option><option value="3" selected>low</option><option value="4">high</option></select>
+    <label class="chip"><span>Registre</span>
+      <select id="octave"><option value="2">greu</option><option value="3" selected>mitjà</option><option value="4">agut</option></select>
     </label>
-    <label class="chip" id="gapChip"><span>Gap</span>
-      <select id="gap"><option value="90">wide</option><option value="55" selected>normal</option><option value="30">tight</option></select>
+    <label class="chip run-only"><span>Marge</span>
+      <select id="gap"><option value="90">ampli</option><option value="55" selected>normal</option><option value="30">estret</option></select>
+    </label>
+    <label class="chip run-only"><span>Noms</span>
+      <select id="names"><option value="1" selected>mostra</option><option value="0">amaga</option></select>
     </label>
   </div>
 
-  <!-- ============ EAR ============ -->
+  <div class="slider run-only" id="speedBox">
+    <span>Velocitat</span>
+    <input type="range" id="speed" min="1" max="10" step="1" value="5">
+    <output id="speedOut">4,2 s</output>
+  </div>
+
+  <!-- ============ OÏDA ============ -->
   <section id="panel-ear">
     <div class="card">
-      <p class="eyebrow">Name the note</p>
-      <p class="status" id="earHint">One note, no reference. Name it.</p>
+      <p class="eyebrow">Endevina la nota</p>
+      <p class="status">Una nota, sense referència. Digues quina és.</p>
       <div class="btn-row">
-        <button class="btn primary" id="earPlay">Play a note</button>
-        <button class="btn ghost" id="earRepeat" disabled>Repeat</button>
+        <button class="btn primary" id="earPlay">Toca una nota</button>
+        <button class="btn ghost" id="earRepeat" disabled>Repeteix</button>
       </div>
       <div class="answers" id="earAnswers"></div>
       <div class="btn-row">
-        <button class="btn ghost" id="earTonic">Hear the tonic (if you want the crutch)</button>
+        <button class="btn ghost" id="earTonic">Escolta la tònica (si vols la crossa)</button>
       </div>
-      <p class="status" id="earStatus">Ready when you are.</p>
+      <p class="status" id="earStatus">Quan vulguis.</p>
     </div>
   </section>
 
-  <!-- ============ RUN ============ -->
+  <!-- ============ CURSA ============ -->
   <section id="panel-run" class="hidden">
     <div class="card">
-      <div class="queue" id="queue"></div>
       <div class="field">
         <canvas id="game"></canvas>
         <div class="hud"><b id="hudNote">—</b> <span id="hudCents"></span></div>
         <div class="overlay" id="overlay">
-          <h2 id="ovTitle">Pitch run</h2>
-          <p id="ovText">Sing the note on each wall. Your voice moves the ball: higher pitch lifts it, lower drops it.</p>
+          <h2 id="ovTitle">Cursa</h2>
+          <p id="ovText">Canta la nota del pentagrama. La teva veu mou la bola: més agut la puja, més greu la baixa.</p>
         </div>
       </div>
       <div class="btn-row">
-        <button class="btn primary" id="micBtn">Turn on microphone</button>
-        <button class="btn ghost" id="startBtn" disabled>Start run</button>
+        <button class="btn primary" id="micBtn">Activa el micròfon</button>
+        <button class="btn ghost" id="startBtn" disabled>Comença</button>
       </div>
-      <p class="status" id="runStatus">Headphones recommended.</p>
+      <p class="status" id="runStatus">Millor amb auriculars.</p>
     </div>
   </section>
 
-  <p class="foot">Pitch detection runs entirely in your browser. Nothing is recorded or uploaded.</p>
+  <p class="foot">La detecció de to es fa al teu navegador. No es grava ni s'envia res.</p>
 </div>
 
 <script>
 /* ============================================================
-   MUSIC
+   MÚSICA
    ============================================================ */
 const SHARP_N = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const FLAT_N  = ["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];
 const SHARP_S = ["do","do♯","re","re♯","mi","fa","fa♯","sol","sol♯","la","la♯","si"];
 const FLAT_S  = ["do","re♭","re","mi♭","mi","fa","sol♭","sol","la♭","la","si♭","si"];
+/* posició diatònica de cada grau cromàtic dins l'octava (7 graus per octava) */
+const PC_POS = [0,0.5,1,1.5,2,3,3.5,4,4.5,5,5.5,6,7];
 
 const SCALES = {
-  major:      { label:"major",        steps:[0,2,4,5,7,9,11],            flat:false },
-  minor:      { label:"minor",        steps:[0,2,3,5,7,8,10],            flat:true  },
-  harmonic:   { label:"harm minor",   steps:[0,2,3,5,7,8,11],            flat:true  },
-  dorian:     { label:"dorian",       steps:[0,2,3,5,7,9,10],            flat:true  },
-  mixolydian: { label:"mixolydian",   steps:[0,2,4,5,7,9,10],            flat:true  },
-  pentaMaj:   { label:"penta major",  steps:[0,2,4,7,9],                 flat:false },
-  pentaMin:   { label:"penta minor",  steps:[0,3,5,7,10],                flat:true  },
-  blues:      { label:"blues",        steps:[0,3,5,6,7,10],              flat:true  },
-  wholeTone:  { label:"whole tone",   steps:[0,2,4,6,8,10],              flat:false },
-  hijaz:      { label:"hijaz",        steps:[0,1,4,5,7,8,11],            flat:true  },
-  chromatic:  { label:"chromatic",    steps:[0,1,2,3,4,5,6,7,8,9,10,11], flat:false }
+  major:      { label:"major",         steps:[0,2,4,5,7,9,11],            flat:false },
+  minor:      { label:"menor",         steps:[0,2,3,5,7,8,10],            flat:true  },
+  harmonic:   { label:"menor harm",    steps:[0,2,3,5,7,8,11],            flat:true  },
+  dorian:     { label:"dòrica",        steps:[0,2,3,5,7,9,10],            flat:true  },
+  mixolydian: { label:"mixolídia",     steps:[0,2,4,5,7,9,10],            flat:true  },
+  pentaMaj:   { label:"pentat major",  steps:[0,2,4,7,9],                 flat:false },
+  pentaMin:   { label:"pentat menor",  steps:[0,3,5,7,10],                flat:true  },
+  blues:      { label:"blues",         steps:[0,3,5,6,7,10],              flat:true  },
+  wholeTone:  { label:"per tons",      steps:[0,2,4,6,8,10],              flat:false },
+  hijaz:      { label:"hijaz",         steps:[0,1,4,5,7,8,11],            flat:true  },
+  chromatic:  { label:"cromàtica",     steps:[0,1,2,3,4,5,6,7,8,9,10,11], flat:false }
 };
 
 const midiToFreq = m => 440 * Math.pow(2, (m - 69) / 12);
 const freqToMidi = f => 69 + 12 * Math.log2(f / 440);
-
-function scaleDef(){ return SCALES[S.scale]; }
-function sylArr(){ return scaleDef().flat ? FLAT_S : SHARP_S; }
-function nameArr(){ return scaleDef().flat ? FLAT_N : SHARP_N; }
+const scaleDef = () => SCALES[S.scale];
+const sylArr  = () => scaleDef().flat ? FLAT_S : SHARP_S;
+const nameArr = () => scaleDef().flat ? FLAT_N : SHARP_N;
 
 function syllable(pc){
   const a = sylArr();
@@ -194,9 +208,27 @@ function noteLabel(midi){
   const r = Math.round(midi);
   return nameArr()[((r % 12) + 12) % 12] + (Math.floor(r / 12) - 1);
 }
+/* posició contínua al pentagrama (en graus diatònics) */
+function staffPos(m){
+  const oct = Math.floor(m / 12) - 1;
+  const pc = m - (oct + 1) * 12;
+  const i = Math.max(0, Math.min(11, Math.floor(pc)));
+  const f = pc - i;
+  return oct * 7 + PC_POS[i] + (PC_POS[i + 1] - PC_POS[i]) * f;
+}
+/* posició del cap de nota (grau enter) i alteració */
+function headPos(midi){
+  const oct = Math.floor(midi / 12) - 1;
+  const pc = ((midi % 12) + 12) % 12;
+  const p = PC_POS[pc];
+  const flat = scaleDef().flat;
+  const letter = flat ? Math.ceil(p) : Math.floor(p);
+  const acc = (p % 1 !== 0) ? (flat ? "♭" : "♯") : "";
+  return { pos: oct * 7 + letter, acc };
+}
 
 /* ============================================================
-   AUDIO
+   ÀUDIO
    ============================================================ */
 let ctx = null;
 function audio(){
@@ -218,7 +250,7 @@ function playTone(freq, dur = 0.8, delay = 0, vol = 0.22){
 }
 
 /* ============================================================
-   PITCH DETECTION — normalised square difference (McLeod)
+   DETECCIÓ DE TO (McLeod, NSDF)
    ============================================================ */
 function detectPitch(buf, sr){
   const SIZE = buf.length;
@@ -226,7 +258,6 @@ function detectPitch(buf, sr){
   for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
   rms = Math.sqrt(rms / SIZE);
   if (rms < 0.008) return null;
-
   const minLag = Math.max(2, Math.floor(sr / 1100));
   const maxLag = Math.min(Math.floor(sr / 65), SIZE >> 1);
   const nsdf = new Float32Array(maxLag + 2);
@@ -267,45 +298,39 @@ function detectPitch(buf, sr){
 }
 
 /* ============================================================
-   STATE
+   ESTAT
    ============================================================ */
 const S = {
-  mode: "ear",
-  scale: "major",
-  tonicPc: 0,
-  system: "movable",
-  octave: 3,
-  gapCents: 55,
-  streak: 0, hits: 0, tries: 0,
-  best: 0,
-  ear: { midi: null, answered: false },
-  mic: { on: false, stream: null, analyser: null, buf: null },
-  game: { state: "idle", walls: [], seq: [], idx: 0, cleared: 0, countdown: 0 }
+  mode:"ear", scale:"major", tonicPc:0, system:"movable", octave:3,
+  gapCents:55, showNames:true, crossTime:4.2,
+  streak:0, hits:0, tries:0, best:0,
+  ear:{ midi:null, answered:false },
+  mic:{ on:false, stream:null, analyser:null, buf:null },
+  game:{ state:"idle", notes:[], seq:[], idx:0, cleared:0, countdown:0 }
 };
 const $ = id => document.getElementById(id);
 
-/* fill selects */
 Object.keys(SCALES).forEach(k => {
   const o = document.createElement("option");
   o.value = k; o.textContent = SCALES[k].label;
   $("scale").appendChild(o);
 });
 function fillKeys(){
-  const cur = $("key").value;
+  const cur = $("key").value || "0";
   $("key").innerHTML = "";
   nameArr().forEach((n, i) => {
     const o = document.createElement("option");
     o.value = i; o.textContent = n;
     $("key").appendChild(o);
   });
-  $("key").value = cur || "0";
+  $("key").value = cur;
 }
 fillKeys();
 
-function scaleMidis(){
+const scaleMidis = () => {
   const base = 12 * (S.octave + 1) + S.tonicPc;
   return scaleDef().steps.map(iv => base + iv);
-}
+};
 function refreshScore(){
   $("streak").textContent = S.streak;
   $("hits").textContent = S.hits;
@@ -313,7 +338,7 @@ function refreshScore(){
 }
 
 /* ============================================================
-   EAR — one note, no reference
+   OÏDA
    ============================================================ */
 function buildAnswers(){
   const grid = $("earAnswers");
@@ -321,9 +346,7 @@ function buildAnswers(){
   scaleMidis().forEach(m => {
     const pc = ((m % 12) + 12) % 12;
     const b = document.createElement("button");
-    b.className = "ans";
-    b.textContent = syllable(pc);
-    b.dataset.pc = pc;
+    b.className = "ans"; b.textContent = syllable(pc); b.dataset.pc = pc;
     b.onclick = () => answerEar(pc, b);
     grid.appendChild(b);
   });
@@ -331,14 +354,12 @@ function buildAnswers(){
 function newEarRound(){
   const notes = scaleMidis();
   let m;
-  do { m = notes[Math.floor(Math.random() * notes.length)]; }
-  while (m === S.ear.midi && notes.length > 1);
-  S.ear.midi = m;
-  S.ear.answered = false;
+  do { m = notes[Math.floor(Math.random() * notes.length)]; } while (m === S.ear.midi && notes.length > 1);
+  S.ear.midi = m; S.ear.answered = false;
   [...$("earAnswers").children].forEach(b => { b.classList.remove("right","wrong"); b.disabled = false; });
-  $("earStatus").textContent = "Name it.";
+  $("earStatus").textContent = "Quina és?";
   $("earStatus").classList.remove("err");
-  $("earPlay").textContent = "New note";
+  $("earPlay").textContent = "Nota nova";
   $("earRepeat").disabled = false;
   playTone(midiToFreq(m), 1.0);
 }
@@ -352,13 +373,12 @@ function answerEar(pc, btn){
   });
   if (pc === target){
     S.hits++; S.streak++;
-    $("earStatus").textContent = "Correct.";
+    $("earStatus").textContent = "Correcte.";
     $("earStatus").classList.remove("err");
     setTimeout(newEarRound, 900);
   } else {
-    S.streak = 0;
-    btn.classList.add("wrong");
-    $("earStatus").textContent = "It was " + syllable(target) + " (" + noteLabel(S.ear.midi) + ").";
+    S.streak = 0; btn.classList.add("wrong");
+    $("earStatus").textContent = "Era " + syllable(target) + " (" + noteLabel(S.ear.midi) + ").";
     $("earStatus").classList.add("err");
   }
   refreshScore();
@@ -368,35 +388,33 @@ $("earRepeat").onclick = () => { if (S.ear.midi !== null) playTone(midiToFreq(S.
 $("earTonic").onclick = () => { audio(); playTone(midiToFreq(12 * (S.octave + 1) + S.tonicPc), 0.9, 0, 0.18); };
 
 /* ============================================================
-   RUN — the wall game
+   CURSA — pentagrama
    ============================================================ */
 const cv = $("game"), g = cv.getContext("2d");
-let W = 0, H = 0, dpr = 1;
-const SPAN = 15;                       // semitones visible top to bottom
-const BALL_X_FRAC = 0.26;
-const CROSS_TIME = 4.2;                // seconds for a wall to cross the field
-const WALL_GAP_T = 2.3;                // seconds between walls
-const WALL_W = 16;
+let W = 0, H = 0, L = 30;
+const BALL_X_FRAC = 0.30;
+const NOTE_R = 7;
 
-function lowMidi(){ return 12 * (S.octave + 1) + S.tonicPc - 2; }
-function yForMidi(m){
-  const t = (m - lowMidi()) / SPAN;
-  return H - Math.max(-0.15, Math.min(1.15, t)) * H;
-}
+/* clau i referència: greu/mitjà -> clau de fa, agut -> clau de sol */
+const isBass = () => S.octave <= 3;
+const refPos = () => isBass() ? 22 : 34;          // línia central: re2(22) / si4(34)
+const yForPos = p => H / 2 - (p - refPos()) * (L / 2);
+const yForMidi = m => yForPos(staffPos(m));
+
 function sizeCanvas(){
   const r = cv.getBoundingClientRect();
-  dpr = Math.min(2, window.devicePixelRatio || 1);
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
   W = r.width; H = r.height;
   cv.width = W * dpr; cv.height = H * dpr;
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  L = Math.max(18, Math.min(34, H / 10));
 }
-window.addEventListener("resize", () => { if (S.mode === "run") sizeCanvas(); });
+window.addEventListener("resize", () => { if (S.mode === "run"){ sizeCanvas(); draw(); } });
 
-const ball = { y: 0, trail: [] };
+const ball = { midi: 60, trail: [] };
 
 function makeSequence(n){
-  const notes = scaleMidis();
-  const seq = [];
+  const notes = scaleMidis(), seq = [];
   let prev = null;
   for (let i = 0; i < n; i++){
     let m;
@@ -405,52 +423,34 @@ function makeSequence(n){
   }
   return seq;
 }
-function renderQueue(){
-  const q = $("queue");
-  q.innerHTML = "";
-  const G = S.game;
-  for (let i = G.idx; i < Math.min(G.idx + 6, G.seq.length); i++){
-    const d = document.createElement("div");
-    d.className = "qnote" + (i === G.idx ? " now" : "");
-    d.textContent = syllable(((G.seq[i] % 12) + 12) % 12);
-    q.appendChild(d);
-  }
-}
-function showOverlay(title, text){
-  $("ovTitle").textContent = title;
-  $("ovText").textContent = text;
-  $("overlay").classList.remove("hidden");
-}
+function showOverlay(t, x){ $("ovTitle").textContent = t; $("ovText").textContent = x; $("overlay").classList.remove("hidden"); }
 function hideOverlay(){ $("overlay").classList.add("hidden"); }
 
 function startRun(){
   if (!S.mic.on) return;
   const G = S.game;
-  G.seq = makeSequence(40);
-  G.idx = 0; G.cleared = 0; G.walls = [];
+  G.seq = makeSequence(48); G.idx = 0; G.cleared = 0; G.notes = [];
   G.state = "count"; G.countdown = 3.2;
-  ball.y = H / 2; ball.trail.length = 0;
-  renderQueue();
+  ball.midi = 12 * (S.octave + 1) + S.tonicPc; ball.trail.length = 0;
   hideOverlay();
   playTone(midiToFreq(12 * (S.octave + 1) + S.tonicPc), 0.7, 0, 0.16);
-  $("startBtn").textContent = "Restart";
+  $("startBtn").textContent = "Reinicia";
 }
 $("startBtn").onclick = () => { audio(); startRun(); };
 
-function spawnWall(){
+function spawnNote(){
   const G = S.game;
-  if (G.idx + G.walls.length >= G.seq.length) return;
-  const midi = G.seq[G.idx + G.walls.length];
-  G.walls.push({ x: W + WALL_W, midi, hit: false, resolved: false });
+  if (G.idx + G.notes.length >= G.seq.length) return;
+  G.notes.push({ x: W + 30, midi: G.seq[G.idx + G.notes.length], resolved:false, miss:false });
 }
 function endRun(){
   const G = S.game;
   G.state = "over";
   S.best = Math.max(S.best, G.cleared);
-  showOverlay(G.cleared + " cleared", "Best " + S.best + ". The ball drops when it misses a gap — tap Restart to run it again.");
+  showOverlay(G.cleared + " superades", "Rècord " + S.best + ". Torna-hi quan vulguis.");
 }
 
-/* ---- mic ---- */
+/* ---- micròfon ---- */
 async function toggleMic(){
   if (S.mic.on){ stopMic(); return; }
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
@@ -459,7 +459,7 @@ async function toggleMic(){
   try {
     audio();
     const stream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation:false, noiseSuppression:false, autoGainControl:false }
+      audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:false }
     });
     const a = audio();
     const src = a.createMediaStreamSource(stream);
@@ -467,35 +467,35 @@ async function toggleMic(){
     const an = a.createAnalyser(); an.fftSize = 2048;
     src.connect(hp); hp.connect(an);
     S.mic = { on:true, stream, analyser:an, buf:new Float32Array(an.fftSize) };
-    $("micBtn").textContent = "Turn off microphone";
+    $("micBtn").textContent = "Atura el micròfon";
     $("startBtn").disabled = false;
-    $("runStatus").textContent = "Listening.";
+    $("runStatus").textContent = "Escoltant.";
     $("runStatus").classList.remove("err");
-    showOverlay("Ready", "Tap Start run. Sing the note shown on each wall to steer the ball through the gap.");
+    showOverlay("A punt", "Prem Comença. Canta la nota que arriba per passar-la.");
   } catch (e){
     $("runStatus").textContent = micReason(e);
     $("runStatus").classList.add("err");
   }
 }
 function micReason(e){
-  if (window.self !== window.top) return "Blocked: running inside an embedded frame. Open the page in its own tab.";
-  if (!window.isSecureContext) return "Blocked: the microphone needs https or localhost. This page is on " + location.protocol;
-  if (e && e.name === "NotAllowedError") return "Permission denied. Allow the microphone in the browser settings and reload.";
-  if (e && e.name === "NotFoundError") return "No input device found.";
-  return "Microphone unavailable: " + (e && e.name ? e.name : "unknown error");
+  if (window.self !== window.top) return "Bloquejat: la pàgina va dins d'un marc incrustat. Obre-la en una pestanya pròpia.";
+  if (!window.isSecureContext) return "Bloquejat: el micròfon necessita https o localhost. Aquesta pàgina va per " + location.protocol;
+  if (e && e.name === "NotAllowedError") return "Permís denegat. Autoritza el micròfon a la configuració del navegador i recarrega.";
+  if (e && e.name === "NotFoundError") return "No s'ha trobat cap entrada d'àudio.";
+  return "Micròfon no disponible: " + (e && e.name ? e.name : "error desconegut");
 }
 function stopMic(){
   if (S.mic.stream) S.mic.stream.getTracks().forEach(t => t.stop());
   S.mic = { on:false, stream:null, analyser:null, buf:null };
   S.game.state = "idle";
-  $("micBtn").textContent = "Turn on microphone";
+  $("micBtn").textContent = "Activa el micròfon";
   $("startBtn").disabled = true;
   $("hudNote").textContent = "—"; $("hudCents").textContent = "";
-  showOverlay("Pitch run", "Sing the note on each wall. Your voice moves the ball: higher pitch lifts it, lower drops it.");
+  showOverlay("Cursa", "Canta la nota del pentagrama. La teva veu mou la bola: més agut la puja, més greu la baixa.");
 }
 $("micBtn").onclick = toggleMic;
 
-/* ---- loop ---- */
+/* ---- bucle ---- */
 let raf = 0, prevT = 0, detT = 0, liveMidi = null;
 
 function frame(ts){
@@ -514,112 +514,179 @@ function frame(ts){
       const c = (liveMidi - Math.round(liveMidi)) * 100;
       $("hudCents").textContent = (c > 0 ? "+" : "") + c.toFixed(0) + "¢";
     } else {
-      liveMidi = null;
-      $("hudNote").textContent = "—";
-      $("hudCents").textContent = "";
+      liveMidi = null; $("hudNote").textContent = "—"; $("hudCents").textContent = "";
     }
   }
 
-  // ball physics
-  if (liveMidi !== null){
-    const target = yForMidi(liveMidi);
-    ball.y += (target - ball.y) * Math.min(1, dt * 14);
-  } else {
-    ball.y += 55 * dt;                       // drifts down in silence
-  }
-  ball.y = Math.max(6, Math.min(H - 6, ball.y));
-  ball.trail.push(ball.y);
+  if (liveMidi !== null) ball.midi += (liveMidi - ball.midi) * Math.min(1, dt * 14);
+  else ball.midi -= 1.6 * dt;                       // cau en silenci
+  const lo = lowestVisible(), hi = highestVisible();
+  ball.midi = Math.max(lo, Math.min(hi, ball.midi));
+  ball.trail.push(ball.midi);
   if (ball.trail.length > 26) ball.trail.shift();
 
   const G = S.game;
   if (G.state === "count"){
     G.countdown -= dt;
-    if (G.countdown <= 0){ G.state = "playing"; spawnWall(); }
+    if (G.countdown <= 0){ G.state = "playing"; spawnNote(); }
   } else if (G.state === "playing"){
-    const speed = W / CROSS_TIME;
-    const spacing = speed * WALL_GAP_T;
-    for (const w of G.walls) w.x -= speed * dt;
+    const speed = W / S.crossTime;
+    const spacing = speed * (S.crossTime * 0.55);
+    for (const n of G.notes) n.x -= speed * dt;
+    const bx = W * BALL_X_FRAC;
 
-    const ballX = W * BALL_X_FRAC;
-    const gapHalf = Math.max(11, (S.gapCents / 100 / SPAN) * H);
-
-    for (const w of G.walls){
-      if (w.resolved) continue;
-      const overlapping = w.x <= ballX + 9 && w.x + WALL_W >= ballX - 9;
-      if (overlapping){
-        const gapY = yForMidi(w.midi);
-        if (Math.abs(ball.y - gapY) > gapHalf){
-          w.resolved = true; w.hit = true;
-          S.streak = 0; S.tries++; refreshScore();
-          endRun();
+    for (const n of G.notes){
+      if (n.resolved) continue;
+      if (n.x <= bx + NOTE_R && n.x >= bx - NOTE_R){
+        const cents = Math.abs(ball.midi - n.midi) * 100;
+        if (cents > S.gapCents){
+          n.resolved = true; n.miss = true;
+          S.streak = 0; S.tries++; refreshScore(); endRun();
           break;
         }
-      } else if (w.x + WALL_W < ballX - 9){
-        w.resolved = true;
+      } else if (n.x < bx - NOTE_R){
+        n.resolved = true;
         G.cleared++; G.idx++; S.hits++; S.tries++; S.streak++;
-        refreshScore(); renderQueue();
-        playTone(midiToFreq(w.midi), 0.18, 0, 0.1);
+        refreshScore();
+        playTone(midiToFreq(n.midi), 0.16, 0, 0.09);
       }
     }
-    G.walls = G.walls.filter(w => w.x > -WALL_W * 3);
-    const last = G.walls[G.walls.length - 1];
-    if (!last || W - last.x >= spacing) spawnWall();
-    if (G.idx >= G.seq.length){ G.state = "over"; showOverlay("Full run", "You cleared the whole sequence."); }
+    G.notes = G.notes.filter(n => n.x > -60);
+    const last = G.notes[G.notes.length - 1];
+    if (!last || W - last.x >= spacing) spawnNote();
+    if (G.idx >= G.seq.length){ G.state = "over"; showOverlay("Cursa completa", "Has passat tota la seqüència."); }
   }
-
   draw();
 }
+function lowestVisible(){ return midiAtPos(refPos() - 9); }
+function highestVisible(){ return midiAtPos(refPos() + 9); }
+function midiAtPos(p){
+  /* invers aproximat de staffPos: cerca binària */
+  let lo = 24, hi = 96;
+  for (let i = 0; i < 30; i++){
+    const mid = (lo + hi) / 2;
+    if (staffPos(mid) < p) lo = mid; else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
 
+/* ============================================================
+   DIBUIX
+   ============================================================ */
 function draw(){
   g.clearRect(0, 0, W, H);
-  const ballX = W * BALL_X_FRAC;
+  const bx = W * BALL_X_FRAC;
+  const linePositions = [-4,-2,0,2,4].map(d => refPos() + d);
 
-  // scale guide lines
-  const notes = scaleMidis();
-  const base = 12 * (S.octave + 1) + S.tonicPc;
-  g.font = "10px ui-monospace, Menlo, monospace";
-  for (const m of notes.concat([base + 12])){
-    const y = yForMidi(m);
-    if (y < 0 || y > H) continue;
-    g.strokeStyle = "rgba(123,108,246,.16)";
-    g.lineWidth = 1;
+  // pentagrama
+  g.strokeStyle = "rgba(122,130,166,.45)";
+  g.lineWidth = 1;
+  for (const p of linePositions){
+    const y = yForPos(p);
     g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke();
-    g.fillStyle = "rgba(122,130,166,.7)";
-    g.fillText(syllable(((m % 12) + 12) % 12), 3, y - 3);
   }
 
-  // walls
-  const gapHalf = Math.max(11, (S.gapCents / 100 / SPAN) * H);
-  for (const w of S.game.walls){
-    const gapY = yForMidi(w.midi);
-    g.fillStyle = w.hit ? "rgba(224,96,126,.55)" : "rgba(43,50,82,.95)";
-    g.fillRect(w.x, 0, WALL_W, gapY - gapHalf);
-    g.fillRect(w.x, gapY + gapHalf, WALL_W, H - (gapY + gapHalf));
-    g.strokeStyle = w.hit ? "rgba(224,96,126,.9)" : "rgba(242,180,65,.85)";
-    g.lineWidth = 2;
-    g.beginPath(); g.moveTo(w.x, gapY - gapHalf); g.lineTo(w.x + WALL_W, gapY - gapHalf); g.stroke();
-    g.beginPath(); g.moveTo(w.x, gapY + gapHalf); g.lineTo(w.x + WALL_W, gapY + gapHalf); g.stroke();
-    g.fillStyle = "rgba(237,235,228,.9)";
-    g.font = "italic 600 14px Fraunces, Georgia, serif";
-    g.fillText(syllable(((w.midi % 12) + 12) % 12), w.x + WALL_W + 5, gapY + 5);
+  // clau
+  g.fillStyle = "rgba(237,235,228,.75)";
+  g.font = (L * 3.2) + "px 'Noto Music', serif";
+  g.textAlign = "left";
+  g.fillText(isBass() ? "\uD834\uDD22" : "\uD834\uDD1E", 4, yForPos(refPos() + (isBass() ? 1.2 : -0.6)));
+
+  // capçal de lectura
+  g.strokeStyle = "rgba(123,108,246,.5)";
+  g.setLineDash([4,4]); g.lineWidth = 1.5;
+  g.beginPath(); g.moveTo(bx, 6); g.lineTo(bx, H - 6); g.stroke();
+  g.setLineDash([]);
+
+  // notes
+  for (const n of S.game.notes){
+    const hp = headPos(n.midi);
+    const hy = yForPos(hp.pos);
+    const ty = yForMidi(n.midi);
+    const gapTop = yForMidi(n.midi + S.gapCents / 100);
+    const gapBot = yForMidi(n.midi - S.gapCents / 100);
+    const half = Math.max(9, (gapBot - gapTop) / 2);
+
+    // finestra d'acceptació
+    g.fillStyle = n.miss ? "rgba(224,96,126,.16)" : "rgba(242,180,65,.11)";
+    g.fillRect(n.x - 15, ty - half, 30, half * 2);
+    g.strokeStyle = n.miss ? "rgba(224,96,126,.7)" : "rgba(242,180,65,.55)";
+    g.lineWidth = 1.2;
+    g.beginPath(); g.moveTo(n.x - 15, ty - half); g.lineTo(n.x + 15, ty - half); g.stroke();
+    g.beginPath(); g.moveTo(n.x - 15, ty + half); g.lineTo(n.x + 15, ty + half); g.stroke();
+
+    // línies addicionals
+    g.strokeStyle = "rgba(122,130,166,.55)";
+    g.lineWidth = 1;
+    const top = refPos() + 4, bot = refPos() - 4;
+    for (let p = bot - 2; p >= hp.pos; p -= 2){
+      const y = yForPos(p);
+      g.beginPath(); g.moveTo(n.x - 13, y); g.lineTo(n.x + 13, y); g.stroke();
+    }
+    for (let p = top + 2; p <= hp.pos; p += 2){
+      const y = yForPos(p);
+      g.beginPath(); g.moveTo(n.x - 13, y); g.lineTo(n.x + 13, y); g.stroke();
+    }
+
+    // connector si el cap i el to real no coincideixen (alteracions)
+    if (Math.abs(hy - ty) > 2){
+      g.strokeStyle = "rgba(242,180,65,.4)";
+      g.setLineDash([2,3]);
+      g.beginPath(); g.moveTo(n.x, hy); g.lineTo(n.x, ty); g.stroke();
+      g.setLineDash([]);
+    }
+
+    // pliqua
+    const up = hp.pos < refPos();
+    g.strokeStyle = n.miss ? "#E0607E" : "#EDEBE4";
+    g.lineWidth = 1.6;
+    g.beginPath();
+    g.moveTo(n.x + (up ? NOTE_R : -NOTE_R), hy);
+    g.lineTo(n.x + (up ? NOTE_R : -NOTE_R), hy + (up ? -L * 1.15 : L * 1.15));
+    g.stroke();
+
+    // cap de nota
+    g.save();
+    g.translate(n.x, hy); g.rotate(-0.34);
+    g.fillStyle = n.miss ? "#E0607E" : "#EDEBE4";
+    g.beginPath(); g.ellipse(0, 0, NOTE_R * 1.25, NOTE_R * 0.92, 0, 0, 7); g.fill();
+    g.restore();
+
+    // alteració
+    if (hp.acc){
+      g.fillStyle = n.miss ? "#E0607E" : "#EDEBE4";
+      g.font = "600 " + Math.round(L * 0.8) + "px 'Noto Music', serif";
+      g.textAlign = "right";
+      g.fillText(hp.acc, n.x - NOTE_R - 4, hy + L * 0.28);
+      g.textAlign = "left";
+    }
+
+    // nom (opcional)
+    if (S.showNames){
+      g.fillStyle = "rgba(237,235,228,.82)";
+      g.font = "italic 600 13px Fraunces, Georgia, serif";
+      g.textAlign = "center";
+      g.fillText(syllable(((n.midi % 12) + 12) % 12), n.x, ty + half + 15);
+      g.textAlign = "left";
+    }
   }
 
-  // ball trail
+  // rastre de la bola
   for (let i = 0; i < ball.trail.length; i++){
     const a = i / ball.trail.length;
-    g.fillStyle = "rgba(242,180,65," + (a * 0.28).toFixed(3) + ")";
+    g.fillStyle = "rgba(242,180,65," + (a * 0.26).toFixed(3) + ")";
     g.beginPath();
-    g.arc(ballX - (ball.trail.length - i) * 2.4, ball.trail[i], 3 + a * 4, 0, 7);
+    g.arc(bx - (ball.trail.length - i) * 2.3, yForMidi(ball.trail[i]), 2.5 + a * 4, 0, 7);
     g.fill();
   }
-  // ball
+  // bola
   g.fillStyle = liveMidi === null ? "#7A82A6" : "#F2B441";
-  g.beginPath(); g.arc(ballX, ball.y, 9, 0, 7); g.fill();
+  g.beginPath(); g.arc(bx, yForMidi(ball.midi), 8.5, 0, 7); g.fill();
 
-  // countdown
+  // compte enrere
   if (S.game.state === "count"){
     g.fillStyle = "rgba(237,235,228,.9)";
-    g.font = "italic 600 46px Fraunces, Georgia, serif";
+    g.font = "italic 600 44px Fraunces, Georgia, serif";
     g.textAlign = "center";
     g.fillText(String(Math.ceil(S.game.countdown)), W / 2, H / 2 + 14);
     g.textAlign = "left";
@@ -627,7 +694,7 @@ function draw(){
 }
 
 /* ============================================================
-   WIRING
+   CONNEXIONS
    ============================================================ */
 function setMode(m){
   S.mode = m;
@@ -635,9 +702,9 @@ function setMode(m){
   $("tab-run").setAttribute("aria-selected", m === "run");
   $("panel-ear").classList.toggle("hidden", m !== "ear");
   $("panel-run").classList.toggle("hidden", m !== "run");
-  $("gapChip").style.display = m === "run" ? "" : "none";
+  document.querySelectorAll(".run-only").forEach(e => e.style.display = m === "run" ? "" : "none");
   if (m === "run"){
-    requestAnimationFrame(() => { sizeCanvas(); ball.y = H / 2; renderQueue(); draw(); });
+    requestAnimationFrame(() => { sizeCanvas(); ball.midi = 12 * (S.octave + 1) + S.tonicPc; draw(); });
   } else stopMic();
 }
 $("tab-ear").onclick = () => setMode("ear");
@@ -645,22 +712,27 @@ $("tab-run").onclick = () => { audio(); setMode("run"); };
 
 function resetAll(){
   S.ear.midi = null;
-  $("earPlay").textContent = "Play a note";
+  $("earPlay").textContent = "Toca una nota";
   $("earRepeat").disabled = true;
   buildAnswers();
-  S.game.state = S.mic.on ? "idle" : "idle";
-  S.game.walls = []; S.game.seq = makeSequence(40); S.game.idx = 0; S.game.cleared = 0;
-  renderQueue();
-  if (S.mode === "run"){ showOverlay("Pitch run", "Scale changed. Tap Start run."); draw(); }
+  S.game.state = "idle"; S.game.notes = []; S.game.seq = makeSequence(48);
+  S.game.idx = 0; S.game.cleared = 0;
+  if (S.mode === "run"){ sizeCanvas(); showOverlay("Cursa", "Configuració canviada. Prem Comença."); draw(); }
 }
 $("scale").onchange = e => { S.scale = e.target.value; fillKeys(); $("key").value = S.tonicPc; resetAll(); };
 $("key").onchange = e => { S.tonicPc = +e.target.value; resetAll(); };
-$("doSystem").onchange = e => { S.system = e.target.value; buildAnswers(); renderQueue(); };
+$("doSystem").onchange = e => { S.system = e.target.value; buildAnswers(); if (S.mode === "run") draw(); };
 $("octave").onchange = e => { S.octave = +e.target.value; resetAll(); };
-$("gap").onchange = e => { S.gapCents = +e.target.value; };
+$("gap").onchange = e => { S.gapCents = +e.target.value; if (S.mode === "run") draw(); };
+$("names").onchange = e => { S.showNames = e.target.value === "1"; if (S.mode === "run") draw(); };
+$("speed").oninput = e => {
+  S.crossTime = 7.2 - (+e.target.value) * 0.6;
+  $("speedOut").textContent = S.crossTime.toFixed(1).replace(".", ",") + " s";
+};
+$("speed").oninput({ target: $("speed") });
 
 buildAnswers();
-S.game.seq = makeSequence(40);
+S.game.seq = makeSequence(48);
 refreshScore();
 setMode("ear");
 raf = requestAnimationFrame(frame);
