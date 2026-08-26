@@ -86,6 +86,10 @@ canvas{display:block;width:100%;height:min(44vh,320px);touch-action:none}
 .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;background:rgba(14,18,32,.74);border-radius:14px}
 .overlay h2{font-family:var(--display);font-style:italic;font-weight:600;font-size:32px;margin:0;letter-spacing:-.02em}
 .overlay p{margin:0;font-size:13.5px;color:var(--mute);max-width:78%}
+.chips{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:8px;max-width:92%}
+.rchip{font-family:var(--mono);font-size:10.5px;padding:3px 6px;border-radius:7px;border:1px solid var(--line);background:var(--panel-2);color:var(--mute)}
+.rchip.ok{border-color:var(--amber);color:var(--amber);background:rgba(242,180,65,.12)}
+.rchip.no{border-color:var(--rose);color:var(--rose);background:rgba(224,96,126,.10)}
 
 .status{font-family:var(--mono);font-size:12px;color:var(--mute);margin-top:12px}
 .status.err{color:var(--rose)}
@@ -155,6 +159,7 @@ canvas{display:block;width:100%;height:min(44vh,320px);touch-action:none}
         <div class="overlay" id="overlay">
           <h2 id="ovTitle">Cursa</h2>
           <p id="ovText">Canta la nota del pentagrama. La teva veu mou la bola: més agut la puja, més greu la baixa.</p>
+          <div class="chips" id="ovChips"></div>
         </div>
       </div>
       <div class="btn-row">
@@ -306,7 +311,7 @@ const S = {
   streak:0, hits:0, tries:0, best:0,
   ear:{ midi:null, answered:false },
   mic:{ on:false, stream:null, analyser:null, buf:null },
-  game:{ state:"idle", notes:[], seq:[], idx:0, cleared:0, countdown:0 }
+  game:{ state:"idle", notes:[], seq:[], spawned:0, sinceSpawn:0, results:[], cleared:0, countdown:0 }
 };
 const $ = id => document.getElementById(id);
 
@@ -407,6 +412,8 @@ const cv = $("game"), g = cv.getContext("2d");
 let W = 0, H = 0, L = 30;
 const BALL_X_FRAC = 0.30;
 const NOTE_R = 7;
+const RUN_LEN = 10;                       // notes per cursa
+const ZERO_PTS = 200;                     // cents on la puntuació arriba a zero
 
 /* clau i referència: greu/mitjà -> clau de fa, agut -> clau de sol */
 const isBass = () => S.octave <= 3;
@@ -436,31 +443,50 @@ function makeSequence(n){
   }
   return seq;
 }
-function showOverlay(t, x){ $("ovTitle").textContent = t; $("ovText").textContent = x; $("overlay").classList.remove("hidden"); }
+function showOverlay(t, x){
+  $("ovTitle").textContent = t; $("ovText").textContent = x;
+  $("ovChips").innerHTML = "";
+  $("overlay").classList.remove("hidden");
+}
 function hideOverlay(){ $("overlay").classList.add("hidden"); }
 
 function startRun(){
   if (!S.mic.on) return;
   const G = S.game;
-  G.seq = makeSequence(48); G.idx = 0; G.cleared = 0; G.notes = [];
+  G.seq = makeSequence(RUN_LEN);
+  G.spawned = 0; G.sinceSpawn = 99; G.results = []; G.cleared = 0; G.notes = [];
   G.state = "count"; G.countdown = 3.2;
   ball.midi = 12 * (S.octave + 1) + S.tonicPc; ball.trail.length = 0;
   hideOverlay();
   playTone(midiToFreq(12 * (S.octave + 1) + S.tonicPc), 0.7, 0, 0.16);
-  $("startBtn").textContent = "Reinicia";
+  $("startBtn").textContent = "Torna-hi";
 }
 $("startBtn").onclick = () => { audio(); startRun(); };
 
 function spawnNote(){
   const G = S.game;
-  if (G.idx + G.notes.length >= G.seq.length) return;
-  G.notes.push({ x: W + 30, midi: G.seq[G.idx + G.notes.length], resolved:false, miss:false });
+  if (G.spawned >= G.seq.length) return;
+  G.notes.push({ x: W + 30, midi: G.seq[G.spawned++], done:false, miss:false, bestErr: Infinity });
+  G.sinceSpawn = 0;
 }
-function endRun(){
+function pointsFor(err){ return Math.max(0, Math.round(100 * (1 - err / ZERO_PTS))); }
+function finishRun(){
   const G = S.game;
   G.state = "over";
-  S.best = Math.max(S.best, G.cleared);
-  showOverlay(G.cleared + " superades", "Rècord " + S.best + ". Torna-hi quan vulguis.");
+  const R = G.results;
+  const total = R.reduce((a, r) => a + r.pts, 0);
+  const dins = R.filter(r => r.ok).length;
+  const mitjana = Math.round(R.reduce((a, r) => a + Math.min(r.err, 400), 0) / R.length);
+  S.best = Math.max(S.best, total);
+  showOverlay(total + " punts",
+    dins + "/" + R.length + " dins del marge · desviació mitjana ±" + mitjana + "¢ · rècord " + S.best);
+  const box = $("ovChips");
+  for (const r of R){
+    const d = document.createElement("div");
+    d.className = "rchip " + (r.ok ? "ok" : "no");
+    d.textContent = syllable(((r.midi % 12) + 12) % 12) + " " + (r.err >= 400 ? "—" : Math.round(r.err) + "¢");
+    box.appendChild(d);
+  }
 }
 
 /* ---- micròfon ---- */
@@ -544,30 +570,31 @@ function frame(ts){
     if (G.countdown <= 0){ G.state = "playing"; spawnNote(); }
   } else if (G.state === "playing"){
     const speed = W / S.crossTime;
-    const spacing = speed * (S.crossTime * 0.55);
     for (const n of G.notes) n.x -= speed * dt;
     const bx = W * BALL_X_FRAC;
+    const win = NOTE_R + 9;
+    G.sinceSpawn += dt;
 
     for (const n of G.notes){
-      if (n.resolved) continue;
-      if (n.x <= bx + NOTE_R && n.x >= bx - NOTE_R){
-        const cents = Math.abs(ball.midi - n.midi) * 100;
-        if (cents > S.gapCents){
-          n.resolved = true; n.miss = true;
-          S.streak = 0; S.tries++; refreshScore(); endRun();
-          break;
-        }
-      } else if (n.x < bx - NOTE_R){
-        n.resolved = true;
-        G.cleared++; G.idx++; S.hits++; S.tries++; S.streak++;
+      if (n.done) continue;
+      if (Math.abs(n.x - bx) <= win){
+        const err = Math.abs(ball.midi - n.midi) * 100;
+        if (err < n.bestErr) n.bestErr = err;      // es queda amb el millor moment
+      } else if (n.x < bx - win){
+        n.done = true;
+        const err = n.bestErr;
+        const ok = err <= S.gapCents;
+        n.miss = !ok;
+        G.results.push({ midi:n.midi, err, pts:pointsFor(err), ok });
+        S.tries++;
+        if (ok){ S.hits++; S.streak++; G.cleared++; playTone(midiToFreq(n.midi), 0.16, 0, 0.09); }
+        else S.streak = 0;
         refreshScore();
-        playTone(midiToFreq(n.midi), 0.16, 0, 0.09);
       }
     }
     G.notes = G.notes.filter(n => n.x > 20);
-    const last = G.notes[G.notes.length - 1];
-    if (!last || W - last.x >= spacing) spawnNote();
-    if (G.idx >= G.seq.length){ G.state = "over"; showOverlay("Cursa completa", "Has passat tota la seqüència."); }
+    if (G.spawned < G.seq.length && G.sinceSpawn >= S.crossTime * 0.55) spawnNote();
+    if (G.results.length >= G.seq.length) finishRun();
   }
   draw();
 }
@@ -747,8 +774,8 @@ function resetAll(){
   $("earPlay").textContent = "Toca una nota";
   $("earRepeat").disabled = true;
   buildAnswers();
-  S.game.state = "idle"; S.game.notes = []; S.game.seq = makeSequence(48);
-  S.game.idx = 0; S.game.cleared = 0;
+  S.game.state = "idle"; S.game.notes = []; S.game.seq = makeSequence(RUN_LEN);
+  S.game.spawned = 0; S.game.results = []; S.game.cleared = 0;
   if (S.mode === "run"){ sizeCanvas(); showOverlay("Cursa", "Configuració canviada. Prem Comença."); draw(); }
 }
 $("scale").onchange = e => { S.scale = e.target.value; fillKeys(); $("key").value = S.tonicPc; resetAll(); };
@@ -764,7 +791,7 @@ $("speed").oninput = e => {
 $("speed").oninput({ target: $("speed") });
 
 buildAnswers();
-S.game.seq = makeSequence(48);
+S.game.seq = makeSequence(RUN_LEN);
 refreshScore();
 setMode("ear");
 raf = requestAnimationFrame(frame);
