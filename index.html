@@ -72,10 +72,14 @@ input[type=range]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;bac
 .ans.wrong{background:rgba(224,96,126,.14);border-color:var(--rose);color:var(--rose)}
 .field{position:relative;margin:0 -16px}
 #stage{display:block;width:100%;height:min(38vh,270px);touch-action:none}
+@media (orientation:landscape){#stage{height:min(72vh,430px)}#mini{height:44px}}
+#panel-run:fullscreen{background:var(--ink);padding:8px;display:flex;flex-direction:column;justify-content:center}
+#panel-run:fullscreen #stage{height:78vh}
 #mini{display:block;width:100%;height:56px;margin-top:6px;touch-action:none}
 .minilab{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);padding:0 4px;margin-top:2px}
 .hud{position:absolute;top:2px;right:16px;font-family:var(--mono);font-size:11px;color:var(--mute);pointer-events:none}
 .hud b{color:var(--text);font-weight:600}
+.rotate{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:10.5px;color:var(--mute);pointer-events:none}
 .bar{position:absolute;top:2px;left:16px;font-family:var(--mono);font-size:11px;color:var(--mute);pointer-events:none}
 .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;background:rgba(14,18,32,.82);border-radius:14px;padding:10px}
 .overlay h2{font-family:var(--display);font-style:italic;font-weight:600;font-size:30px;margin:0}
@@ -149,7 +153,7 @@ input[type=range]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;bac
     <div class="card">
       <div class="field">
         <canvas id="stage"></canvas>
-        <div class="bar" id="barno"></div>
+        <div class="bar" id="barno"></div><div class="rotate hidden" id="rotate">gira el mòbil per veure 4 compassos per línia</div>
         <div class="hud"><b id="hudNote">—</b> <span id="hudCents"></span></div>
         <div class="overlay" id="overlay">
           <h2 id="ovTitle">Lectura</h2>
@@ -163,7 +167,7 @@ input[type=range]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;bac
         <button class="btn primary" id="micBtn">Activa el micròfon</button>
         <button class="btn ghost" id="startBtn" disabled>Comença</button>
       </div>
-      <div class="btn-row"><button class="btn ghost" id="newBtn">Exercici nou</button></div>
+      <div class="btn-row"><button class="btn ghost" id="newBtn">Exercici nou</button><button class="btn ghost" id="fsBtn">Pantalla completa</button></div>
       <p class="status" id="runStatus">Millor amb auriculars.</p>
     </div>
   </section>
@@ -193,6 +197,7 @@ const ADV = { head:1.18, headWhole:1.688, dot:0.40, sharp:0.996, flat:0.904,
 const ENG = { stem:0.12, beam:0.50, staffLine:0.13, leger:0.16, legerExt:0.40,
               thinBar:0.16, thickBar:0.50, stemLen:3.50, tie:0.13 };
 
+const NOTE_OFF = 9;   // separació constant respecte de la barra de compàs
 const PC_POS = [0,0.5,1,1.5,2,3,3.5,4,4.5,5,5.5,6,7];
 const STEPS = ["C","D","E","F","G","A","B"];
 const STEP_SEMI = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
@@ -222,14 +227,13 @@ function figureOf(beats){
   return { type:"quarter", dots:0 };
 }
 
-/* ---------------- LAYOUT ----------------
-   Dues passades. Primer amplades en ESPAIS DE PENTAGRAMA (independents de la
-   mida), després escalat a píxels. Cada nota reserva el que ocupa realment:
-   alteració + cap + punts + banderola + separació mínima.                    */
+/* ---------------- LAYOUT PER SISTEMES ----------------
+   La partitura es trenca en sistemes de N compassos, com una pàgina de veritat.
+   Amplades en espais de pentagrama; després s'escala i es justifica cada sistema
+   perquè tots acabin al mateix marge dret.                                     */
 const SPACE_BY_DUR = { 0.5:2.3, 0.75:2.7, 1:3.1, 1.5:3.8, 2:4.4, 3:5.4, 4:6.2 };
-const PAD_AFTER_BAR = 0.7;      // després de la barra de compàs
-const PAD_BEFORE_BAR = 1.0;     // abans de la barra de compàs
-const MIN_GAP = 0.6;            // separació mínima entre dibuixos veïns
+const PAD_AFTER_BAR = 0.7, PAD_BEFORE_BAR = 1.0, MIN_GAP = 0.6;
+const SYS_H = 9;                       // alçada d'un sistema, en espais
 
 function itemNeed(it){
   const n = it.note;
@@ -237,27 +241,25 @@ function itemNeed(it){
   if (n.pitch && n.pitch.alter) w += (n.pitch.alter > 0 ? ADV.sharp : ADV.flat) + 0.28;
   w += n.pitch ? (it.fig.type === "whole" ? ADV.headWhole : ADV.head) : 1.15;
   w += it.fig.dots * (ADV.dot + 0.12);
-  if (n.pitch && it.fig.type === "eighth" && !it.group) w += 0.75;   // banderola
+  if (n.pitch && it.fig.type === "eighth" && !it.group) w += 0.75;
   return w + MIN_GAP;
 }
+function clefSpaces(score){ return 0.5 + (score.clef === "F" ? ADV.fClef : ADV.gClef) + 0.9; }
 
-function layoutScore(score){
-  const measures = [], items = [];
+function layoutScore(score, perSystem){
+  const items = [], measures = [];
   let beat = 0;
   for (let mi = 0; mi < score.measures.length; mi++){
-    const m = score.measures[mi];
     const mItems = [];
-    for (const n of m.notes){
+    for (const n of score.measures[mi].notes){
       const beats = n.duration / score.divisions;
       const it = { note:n, beat, beats, fig: figureOf(beats), measure: mi };
-      mItems.push(it); items.push(it);
-      beat += beats;
+      mItems.push(it); items.push(it); beat += beats;
     }
     measures.push({ index:mi, items:mItems,
       startBeat: mItems.length ? mItems[0].beat : beat, endBeat: beat });
   }
-  /* grups de corxeres: cal saber-los abans d'amidar, perquè una corxera unida
-     amb barra no porta banderola i ocupa menys                                */
+  /* grups de corxeres */
   let gid = 0;
   for (let i = 0; i < items.length; i++){
     const it = items[i];
@@ -271,49 +273,85 @@ function layoutScore(score){
     }
     if (grp.length > 1){ gid++; grp.forEach(n => n.group = gid); }
   }
-  /* amplades en espais */
-  let x = 0;
-  for (const m of measures){
-    x += PAD_AFTER_BAR;
-    if (m.index === 0){ m.timeXs = x; x += ADV.timeSig + 0.9; }
-    m.xs = x - PAD_AFTER_BAR;
-    for (const it of m.items){
-      it.xs = x;
-      const base = SPACE_BY_DUR[it.beats] || (2.7 + 2.2 * Math.sqrt(it.beats));
-      it.ws = Math.max(base, itemNeed(it));
-      x += it.ws;
-    }
-    x += PAD_BEFORE_BAR;
-    m.barXs = x;
-    m.ws = x - m.xs;
+  /* sistemes */
+  const systems = [];
+  for (let i = 0; i < measures.length; i += perSystem){
+    const ms = measures.slice(i, i + perSystem);
+    const sys = { index: systems.length, measures: ms,
+                  startBeat: ms[0].startBeat, endBeat: ms[ms.length - 1].endBeat };
+    ms.forEach(m => m.system = sys.index);
+    systems.push(sys);
   }
-  const lay = { measures, items, totalBeats: beat, totalSpaces: x };
+  /* amplades dins de cada sistema */
+  const clef = clefSpaces(score);
+  for (const sys of systems){
+    let x = clef;
+    sys.musicStart = x;
+    if (sys.index === 0){ sys.timeXs = x; x += ADV.timeSig + 0.9; }
+    for (const m of sys.measures){
+      x += PAD_AFTER_BAR;
+      m.xs = x - PAD_AFTER_BAR;
+      for (const it of m.items){
+        it.xs = x; it.sys = sys.index;
+        it.ws = Math.max(SPACE_BY_DUR[it.beats] || (2.7 + 2.2 * Math.sqrt(it.beats)), itemNeed(it));
+        x += it.ws;
+      }
+      x += PAD_BEFORE_BAR;
+      m.barXs = x; m.ws = x - m.xs;
+    }
+    sys.spaces = x;
+  }
+  const maxSpaces = Math.max(...systems.map(s => s.spaces));
+  /* justificació: cada sistema s'estira fins al marge comú                      */
+  for (const sys of systems){
+    const room = maxSpaces - sys.musicStart, have = sys.spaces - sys.musicStart;
+    const k = have > 0 ? room / have : 1;
+    sys.stretch = k;
+    const st = v => sys.musicStart + (v - sys.musicStart) * k;
+    if (sys.timeXs !== undefined) sys.timeXs = st(sys.timeXs);
+    for (const m of sys.measures){
+      m.xs = st(m.xs); m.barXs = st(m.barXs); m.ws = m.barXs - m.xs;
+      for (const it of m.items){ it.xs = st(it.xs); it.ws *= k; }
+    }
+    sys.spaces = maxSpaces;
+  }
+  const lay = { systems, measures, items, totalBeats: beat, maxSpaces, perSystem };
   buildTimeMap(lay);
   return lay;
 }
-/* mapa temps -> posició: lineal a trossos entre notes, com el cursor de MuseScore */
+/* mapa temps -> (sistema, posició), lineal a trossos entre notes */
 function buildTimeMap(lay){
   const pts = [];
-  for (const it of lay.items) pts.push({ b: it.beat, xs: it.xs });
-  pts.push({ b: lay.totalBeats, xs: lay.totalSpaces });
+  for (const it of lay.items) pts.push({ b: it.beat, sys: it.sys, xs: it.xs });
+  const lastSys = lay.systems[lay.systems.length - 1];
+  pts.push({ b: lay.totalBeats, sys: lastSys.index, xs: lay.maxSpaces });
   lay.timeMap = pts;
 }
-function xAtBeat(lay, b){
-  const p = lay.timeMap;
-  if (!p || !p.length) return 0;
-  if (b <= p[0].b) return p[0].xs * lay.scale;
+function posAtBeat(lay, b){
+  const p = lay.timeMap, L = lay.scale || 1;
+  if (!p.length) return { sys:0, x:0 };
+  if (b <= p[0].b) return { sys:p[0].sys, x:p[0].xs * L };
   let lo = 0, hi = p.length - 1;
   while (lo < hi - 1){ const mid = (lo + hi) >> 1; (p[mid].b <= b) ? lo = mid : hi = mid; }
   const a = p[lo], c = p[hi];
+  if (c.sys !== a.sys) {           // final de sistema: es queda fins al marge
+    const t = c.b === a.b ? 0 : (b - a.b) / (c.b - a.b);
+    return { sys:a.sys, x:(a.xs + (lay.maxSpaces - a.xs) * t) * L };
+  }
   const t = c.b === a.b ? 0 : (b - a.b) / (c.b - a.b);
-  return (a.xs + (c.xs - a.xs) * t) * lay.scale;
+  return { sys:a.sys, x:(a.xs + (c.xs - a.xs) * t) * L };
 }
-/* escala el layout a píxels */
 function scaleLayout(lay, L){
   lay.scale = L;
-  for (const m of lay.measures){ m.x = m.xs * L; m.w = m.ws * L; m.barX = m.barXs * L; }
-  for (const it of lay.items){ it.x = it.xs * L; it.w = it.ws * L; }
-  lay.totalW = lay.totalSpaces * L;
+  lay.sysH = SYS_H * L;
+  lay.width = lay.maxSpaces * L;
+  for (const sys of lay.systems){
+    sys.timeX = sys.timeXs !== undefined ? sys.timeXs * L : undefined;
+    for (const m of sys.measures){
+      m.x = m.xs * L; m.w = m.ws * L; m.barX = m.barXs * L;
+      for (const it of m.items){ it.x = it.xs * L; it.w = it.ws * L; }
+    }
+  }
 }
 
 /* ---------------- DIBUIX ---------------- */
@@ -335,17 +373,6 @@ function drawStaffLines(g, x0, x1, L, refPos, midY, C){
   }
 }
 
-function drawGutter(g, score, cfg){
-  const { L, refPos, midY, C } = cfg;
-  const gw = gutterW(L);
-  drawStaffLines(g, 0, gw, L, refPos, midY, C);
-  g.fillStyle = C.ink;
-  const d = makeDraw(g, L, refPos, C);
-  const y = p => midY + d.yPos(p);
-  if (score.clef === "F") d.glyph(SM.fClef, L * 0.5, y(refPos + 2));
-  else d.glyph(SM.gClef, L * 0.5, y(refPos - 2));
-  return gw;
-}
 function drawDigits(g, d, s, x, y, L){
   const w = s.length * ADV.timeSig * L;
   let cx = x - w / 2 + (ADV.timeSig * L) / 2;
@@ -354,18 +381,26 @@ function drawDigits(g, d, s, x, y, L){
     cx += ADV.timeSig * L;
   }
 }
-const gutterW = L => L * (0.5 + 2.74 + 0.8);
 
 /* dibuixa els compassos visibles; el context ja ha d'estar traslladat */
-function drawMeasures(g, score, lay, cfg, fromX, toX){
+function drawSystemAt(g, score, lay, sysIndex, cfg){
+  const sys = lay.systems[sysIndex];
   const { L, refPos, midY, C, showNames, syllableOf, useFlats } = cfg;
   const d = makeDraw(g, L, refPos, C);
   const y = p => midY + d.yPos(p);
 
-  for (const m of lay.measures){
-    if (m.x + m.w < fromX - L * 4 || m.x > toX + L * 4) continue;
-    drawStaffLines(g, m.x, m.x + m.w, L, refPos, midY, C);
-    // barra de compàs al final
+  // clau al principi de cada sistema
+  drawStaffLines(g, L * 0.3, lay.width, L, refPos, midY, C);
+  g.fillStyle = C.ink;
+  if (score.clef === "F"){
+    d.glyph(SM.fClef, L * 0.5, y(refPos + 2));
+    g.beginPath(); g.arc(L*0.5 + ADV.fClef*L*0.30, y(refPos + 2) - L*0.5, L*0.001, 0, 7);
+  } else d.glyph(SM.gClef, L * 0.5, y(refPos - 2));
+  if (sys.timeX !== undefined){
+    drawDigits(g, d, String(score.time.beats), sys.timeX + ADV.timeSig * L / 2, y(refPos + 2), L);
+    drawDigits(g, d, String(score.time.beatType), sys.timeX + ADV.timeSig * L / 2, y(refPos - 2), L);
+  }
+  for (const m of sys.measures){
     const last = m.index === lay.measures.length - 1;
     const bx = m.barX;
     g.strokeStyle = C.staff;
@@ -379,11 +414,6 @@ function drawMeasures(g, score, lay, cfg, fromX, toX){
       g.beginPath(); g.moveTo(bx, y(refPos + 4)); g.lineTo(bx, y(refPos - 4)); g.stroke();
     }
 
-    if (m.timeXs !== undefined){
-      g.fillStyle = C.ink;
-      drawDigits(g, d, String(score.time.beats), m.timeXs * L + ADV.timeSig * L / 2, y(refPos + 2), L);
-      drawDigits(g, d, String(score.time.beatType), m.timeXs * L + ADV.timeSig * L / 2, y(refPos - 2), L);
-    }
     for (const it of m.items){
       const n = it.note;
       if (!n.pitch){ drawRest(g, d, it, y, L, refPos, C); continue; }
@@ -445,7 +475,7 @@ function drawMeasures(g, score, lay, cfg, fromX, toX){
 
   // barres d'unió
   const groups = {};
-  for (const it of lay.items) if (it.group && it._sx !== undefined) (groups[it.group] = groups[it.group] || []).push(it);
+  for (const it of sys.measures.flatMap(m=>m.items)) if (it.group && it._sx !== undefined) (groups[it.group] = groups[it.group] || []).push(it);
   for (const k in groups){
     const grp = groups[k];
     if (grp.length < 2) continue;
@@ -466,17 +496,23 @@ function drawMeasures(g, score, lay, cfg, fromX, toX){
   }
 
   // lligadures de prolongació
-  for (let i = 0; i < lay.items.length - 1; i++){
-    const a = lay.items[i], b = lay.items[i + 1];
+  const sysItems = sys.measures.flatMap(m=>m.items);
+  for (let i = 0; i < sysItems.length - 1; i++){
+    const a = sysItems[i], b = sysItems[i + 1];
     if (a.note.tie !== "start" || !a.note.pitch || !b.note.pitch) continue;
     if (a._y === undefined || b._y === undefined) continue;
     const up = a._up;
-    const y0 = a._y + (up ? L * 0.75 : -L * 0.75);
-    const x0 = a.x + ADV.head * L * 0.5, x1 = b.x + ADV.head * L * 0.5;
+    const x0 = a.x + ADV.head * L * 0.72, x1 = b.x + ADV.head * L * 0.28;
+    const span = Math.max(1, x1 - x0);
+    /* la fletxa creix amb la llargada, com als gravats: ni plana ni desbocada */
+    const arc = Math.max(L * 0.55, Math.min(L * 1.5, span * 0.16));
+    const y0 = a._y + (up ? L * 0.62 : -L * 0.62);
+    const y1 = b._y + (up ? L * 0.62 : -L * 0.62);
     g.strokeStyle = C.ink; g.lineWidth = ENG.tie * L;
     g.beginPath();
     g.moveTo(x0, y0);
-    g.quadraticCurveTo((x0 + x1) / 2, y0 + (up ? L * 0.8 : -L * 0.8), x1, y0);
+    g.bezierCurveTo(x0 + span * 0.25, y0 + (up ? arc : -arc),
+                    x1 - span * 0.25, y1 + (up ? arc : -arc), x1, y1);
     g.stroke();
   }
 }
@@ -494,34 +530,30 @@ function drawRest(g, d, it, y, L, refPos, C){
 
 /* ---------------- MINIATURA ---------------- */
 function drawMini(g, score, lay, cfg){
-  const { W, H, C, results, progressBeat, refPos } = cfg;
+  const { W, H, C, results, progressBeat } = cfg;
   g.clearRect(0, 0, W, H);
   const padX = 6, padY = 5;
-  const sx = (W - padX * 2) / lay.totalW;
+  const total = lay.systems.length * lay.maxSpaces;
+  const sx = (W - padX * 2) / total;
+  const gx = it => (it.sys * lay.maxSpaces + it.xs) * sx + padX;
   const pitched = lay.items.filter(i => i.note.pitch);
   if (!pitched.length) return;
   const ps = pitched.map(i => pitchToPos(i.note.pitch));
   const lo = Math.min(...ps) - 1, hi = Math.max(...ps) + 1;
   const yOf = p => H - padY - ((p - lo) / (hi - lo)) * (H - padY * 2);
-
-  // compassos
   g.strokeStyle = C.grid; g.lineWidth = 1;
-  for (const m of lay.measures){
-    const x = padX + m.barX * sx;
-    g.beginPath(); g.moveTo(x, padY * 0.5); g.lineTo(x, H - padY * 0.5); g.stroke();
+  for (const sys of lay.systems) for (const m of sys.measures){
+    const x = (sys.index * lay.maxSpaces + m.barXs) * sx + padX;
+    g.beginPath(); g.moveTo(x, padY * .5); g.lineTo(x, H - padY * .5); g.stroke();
   }
-  // notes
   for (let i = 0; i < pitched.length; i++){
-    const it = pitched[i];
-    const x = padX + it.x * sx, y = yOf(pitchToPos(it.note.pitch));
-    const r = results && results[i];
+    const it = pitched[i], r = results && results[i];
     g.fillStyle = !r ? C.dim : r.ok ? C.ok : C.bad;
-    const w = Math.max(2.5, it.w * sx);
-    g.fillRect(x, y - 1.6, w, 3.2);
+    g.fillRect(gx(it), yOf(pitchToPos(it.note.pitch)) - 1.6, Math.max(2.5, it.ws * sx), 3.2);
   }
-  // progrés
   if (progressBeat >= 0){
-    const x = padX + xAtBeat(lay, progressBeat) * sx;
+    const p = posAtBeat(lay, progressBeat);
+    const x = (p.sys * lay.maxSpaces + p.x / (lay.scale || 1)) * sx + padX;
     g.strokeStyle = C.cursor; g.lineWidth = 1.5;
     g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke();
   }
@@ -630,7 +662,7 @@ const S={
   ear:{midi:null,answered:false},
   mic:{on:false,stream:null,analyser:null,buf:null},
   run:{state:"idle",score:null,lay:null,targets:[],results:null,
-       startAt:0,nextClick:0,scroll:0,scrollTo:0,curMeasure:0,trail:[]}
+       startAt:0,nextClick:0,trail:[]}
 };
 const ZERO_PTS=200;
 const $=id=>document.getElementById(id);
@@ -783,13 +815,19 @@ function buildTargets(){
 }
 
 /* ============================================================
-   PANTALLA
+   PANTALLA — pàgina de partitura, sistemes de 4 compassos
    ============================================================ */
 const stage=$("stage"),g=stage.getContext("2d");
 const mini=$("mini"),mg=mini.getContext("2d");
-let W=0,H=0,L=20,MW=0,MH=0;
+let W=0,H=0,L=14,MW=0,MH=0;
+let scrollY=0,scrollTarget=0,sysVisible=1;
+const MARGIN=8,TOPPAD=8;
 const C={staff:"rgba(122,130,166,.6)",ink:"#EDEBE4",faint:"rgba(122,130,166,.95)",
   grid:"rgba(43,50,82,.9)",dim:"rgba(122,130,166,.45)",ok:"#F2B441",bad:"#E0607E",cursor:"#7B6CF6"};
+
+const isLandscape=()=>(window.matchMedia&&window.matchMedia("(orientation:landscape)").matches)
+  ||window.innerWidth>window.innerHeight;
+const perSystem=()=>isLandscape()?4:2;
 
 function sizeAll(){
   const dpr=Math.min(2,window.devicePixelRatio||1);
@@ -800,82 +838,122 @@ function sizeAll(){
   MW=r.width;MH=r.height;
   mini.width=MW*dpr;mini.height=MH*dpr;mg.setTransform(dpr,0,0,dpr,0,0);
   relayout();
+  $("rotate").classList.toggle("hidden",isLandscape());
 }
 window.addEventListener("resize",()=>{if(S.mode==="run"){sizeAll();drawAll();}});
 
 function relayout(){
   if(!S.run.score||!W)return;
-  const vb=S.meterN*(1+S.look);
-  /* el layout s'amida en espais de pentagrama i després s'escala, de manera
-     que la mida surt de la densitat real de l'exercici                        */
-  const lay=layoutScore(S.run.score);
-  const perBeat=lay.totalSpaces/Math.max(1,lay.totalBeats);
-  L=Math.max(7,Math.min(H/10,W/(perBeat*vb+4.05)));
+  const lay=layoutScore(S.run.score,perSystem());
+  /* la vista és sempre de N compassos; el pentagrama s'adapta a la densitat */
+  L=Math.max(6,Math.min((H-TOPPAD*2)/SYS_H,(W-MARGIN*2)/lay.maxSpaces));
   scaleLayout(lay,L);
   S.run.lay=lay;
+  sysVisible=Math.max(1,Math.floor((H-TOPPAD)/lay.sysH));
+  scrollY=scrollTarget=0;
 }
-function cfgStage(){
-  return{L,refPos:refPos(),midY:H/2,C,showNames:S.showNames,syllableOf,useFlats:useFlats()};
-}
-function xOfBeat(b){return xAtBeat(S.run.lay,b);}
+const maxScroll=()=>{const l=S.run.lay;
+  return Math.max(0,l.systems.length*l.sysH-(H-TOPPAD*2));};
+const sysY=i=>TOPPAD+i*S.run.lay.sysH-scrollY;
+function cfgStage(){return{L,refPos:refPos(),midY:0,C,showNames:S.showNames,
+  syllableOf,useFlats:useFlats()};}
 
 function drawAll(){
   if(!S.run.lay||!W)return;
-  const R=S.run,lay=R.lay,gw=gutterW(L);
+  const lay=S.run.lay;
   g.clearRect(0,0,W,H);
   if(!fontReady){
     g.fillStyle=C.faint;g.font="13px system-ui";g.textAlign="center";
     g.fillText("carregant els símbols…",W/2,H/2);g.textAlign="left";return;
   }
-  // partitura desplaçada
-  g.save();
-  g.beginPath();g.rect(gw,0,W-gw,H);g.clip();
-  g.translate(gw-R.scroll,0);
-  drawMeasures(g,R.score,lay,cfgStage(),R.scroll,R.scroll+W);
+  for(let i=0;i<lay.systems.length;i++){
+    const y=sysY(i);
+    if(y+lay.sysH<-10||y>H+10)continue;
+    g.save();g.translate(MARGIN,y+lay.sysH/2);
+    drawSystemAt(g,S.run.score,lay,i,cfgStage());
+    g.restore();
+  }
   // rastre de la veu
+  const R=S.run;
   if(R.trail.length>1){
     g.strokeStyle="rgba(242,180,65,.45)";g.lineWidth=2;g.lineCap="round";
-    g.beginPath();let on=false;
+    let cur=-1,on=false;
+    g.beginPath();
     for(const p of R.trail){
-      const x=xOfBeat(p.b),y=H/2-(midiToPos(p.m)-refPos())*(L/2);
-      if(x<R.scroll-40||x>R.scroll+W+40||y<-30||y>H+30){on=false;continue;}
-      on?g.lineTo(x,y):g.moveTo(x,y);on=true;
+      const q=posAtBeat(lay,p.b);
+      if(q.sys!==cur){cur=q.sys;on=false;}
+      const yc=sysY(q.sys)+lay.sysH/2;
+      if(yc<-lay.sysH||yc>H+lay.sysH){on=false;continue;}
+      const yy=yc-(midiToPos(p.m)-refPos())*(L/2);
+      if(yy<yc-lay.sysH/2||yy>yc+lay.sysH/2){on=false;continue;}
+      const xx=MARGIN+q.x;
+      on?g.lineTo(xx,yy):g.moveTo(xx,yy);on=true;
     }
     g.stroke();
   }
-  g.restore();
-  // guarda fixa amb clau i compàs
-  g.fillStyle="#171C30";g.fillRect(0,0,gw,H);
-  drawGutter(g,R.score,cfgStage());
-
-  // cursor i bola
+  // cursor
   if(R.state==="playing"||R.state==="count"){
     const b=Math.max(0,currentBeat());
-    const x=gw+xOfBeat(b)-R.scroll;
-    if(x>=gw-1&&x<=W){
-      g.strokeStyle=R.state==="count"?"rgba(123,108,246,.45)":"rgba(123,108,246,.85)";
+    const q=posAtBeat(lay,b);
+    const yc=sysY(q.sys)+lay.sysH/2;
+    if(yc>-lay.sysH&&yc<H+lay.sysH){
+      g.strokeStyle=R.state==="count"?"rgba(123,108,246,.4)":"rgba(123,108,246,.85)";
       g.lineWidth=2;
-      g.beginPath();g.moveTo(x,H/2-L*3.2);g.lineTo(x,H/2+L*3.2);g.stroke();
+      g.beginPath();g.moveTo(MARGIN+q.x,yc-L*3.4);g.lineTo(MARGIN+q.x,yc+L*3.4);g.stroke();
       if(smooth!==null&&liveMidi!==null){
-        const y=H/2-(midiToPos(smooth)-refPos())*(L/2);
-        g.fillStyle=C.ok;g.beginPath();g.arc(x,y,6.5,0,7);g.fill();
+        const yy=yc-(midiToPos(smooth)-refPos())*(L/2);
+        g.fillStyle=C.ok;g.beginPath();g.arc(MARGIN+q.x,yy,6,0,7);g.fill();
       }
     }
-  }
-  if(S.run.state==="count"){
-    const b=currentBeat();
+    $("barno").textContent="sistema "+(q.sys+1)+"/"+lay.systems.length;
+  }else $("barno").textContent=lay.systems.length+" sistemes";
+  if(R.state==="count"){
     g.fillStyle="rgba(237,235,228,.9)";
-    g.font="italic 600 34px Fraunces, Georgia, serif";g.textAlign="center";
-    g.fillText(String(Math.ceil(-b)),W/2,H/2+10);g.textAlign="left";
+    g.font="italic 600 30px Fraunces, Georgia, serif";g.textAlign="center";
+    g.fillText(String(Math.ceil(-currentBeat())),W/2,H-14);g.textAlign="left";
   }
-  $("barno").textContent="compàs "+(R.curMeasure+1)+"/"+R.score.measures.length;
   drawMiniNow();
 }
 function drawMiniNow(){
   if(!S.run.lay||!MW)return;
-  drawMini(mg,S.run.score,S.run.lay,{W:MW,H:MH,C,refPos:refPos(),
+  drawMini(mg,S.run.score,S.run.lay,{W:MW,H:MH,C,
     results:S.run.results,progressBeat:S.run.state==="playing"?Math.max(0,currentBeat()):-1});
 }
+
+/* desplaçament manual quan no s'està tocant */
+let drag=null;
+stage.addEventListener("pointerdown",e=>{
+  if(S.run.state==="playing"||S.run.state==="count")return;
+  drag={y:e.clientY,s:scrollY};stage.setPointerCapture(e.pointerId);
+});
+stage.addEventListener("pointermove",e=>{
+  if(!drag)return;
+  scrollY=scrollTarget=Math.max(0,Math.min(maxScroll(),drag.s-(e.clientY-drag.y)));
+  drawAll();
+});
+stage.addEventListener("pointerup",()=>{drag=null;});
+stage.addEventListener("pointercancel",()=>{drag=null;});
+stage.addEventListener("wheel",e=>{
+  if(S.run.state==="playing"||S.run.state==="count")return;
+  e.preventDefault();
+  scrollY=scrollTarget=Math.max(0,Math.min(maxScroll(),scrollY+e.deltaY));
+  drawAll();
+},{passive:false});
+
+/* pantalla completa i gir */
+$("fsBtn").onclick=async()=>{
+  const el=document.getElementById("panel-run");
+  try{
+    if(!document.fullscreenElement){
+      await (el.requestFullscreen?el.requestFullscreen():Promise.reject());
+      try{await screen.orientation.lock("landscape");}catch(e){}
+    }else{
+      try{screen.orientation.unlock();}catch(e){}
+      await document.exitFullscreen();
+    }
+  }catch(e){}
+  setTimeout(()=>{sizeAll();drawAll();},250);
+};
 
 /* ============================================================
    MICRÒFON I PANTALLA
@@ -937,7 +1015,7 @@ function startRun(){
   if(!S.mic.on||!S.run.score)return;
   const R=S.run;
   for(const t of R.targets)t.err=Infinity;
-  R.results=null;R.trail=[];R.curMeasure=0;R.scroll=0;R.scrollTo=0;
+  R.results=null;R.trail=[];scrollY=scrollTarget=0;
   R.startAt=audio().currentTime+.35;R.nextClick=0;R.state="count";
   hideOverlay();keepAwake(true);
   $("startBtn").textContent="Torna-hi";
@@ -1008,8 +1086,6 @@ function frame(ts){
     if(b>=0&&R.state==="count")R.state="playing";
     if(b>=R.totalBeats)finishRun();
     else if(b>=0){
-      const m=R.lay.measures.find(mm=>b>=mm.startBeat&&b<mm.endBeat);
-      if(m)R.curMeasure=m.index;
       if(smooth!==null&&liveMidi!==null){
         for(const t of R.targets){
           const skip=(t.end-t.start)*.18;
@@ -1023,14 +1099,13 @@ function frame(ts){
       }
     }
   }
-  // desplaçament continu: el cursor queda ancorat i la partitura passa per sota
-  if(R.state==="playing"||R.state==="count"){
-    const musicW=W-gutterW(L);
-    const anchor=musicW*0.30;
-    const maxScroll=Math.max(0,R.lay.totalW+musicW*0.12-musicW);
-    R.scrollTo=Math.max(0,Math.min(maxScroll,xOfBeat(Math.max(0,currentBeat()))-anchor));
-    R.scroll=R.scrollTo;
+  // la partitura no es mou: només passa de sistema quan cal
+  if(R.state==="playing"){
+    const q=posAtBeat(R.lay,Math.max(0,currentBeat()));
+    const want=Math.max(0,Math.min(maxScroll(),q.sys*R.lay.sysH-(sysVisible>1?0:0)));
+    if(Math.abs(want-scrollTarget)>1)scrollTarget=want;
   }
+  scrollY+=(scrollTarget-scrollY)*Math.min(1,dt*7);
   drawAll();
 }
 
