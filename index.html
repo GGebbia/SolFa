@@ -71,14 +71,15 @@ input[type=range]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;bac
 .ans.right{background:rgba(242,180,65,.16);border-color:var(--amber);color:var(--amber)}
 .ans.wrong{background:rgba(224,96,126,.14);border-color:var(--rose);color:var(--rose)}
 .field{position:relative;margin:0 -16px}
-#stage{display:block;width:100%;height:min(38vh,270px);touch-action:none}
-@media (orientation:landscape){#stage{height:min(72vh,430px)}#mini{height:44px}}
+#stage{display:block;width:100%;touch-action:pan-y}
+@media (orientation:landscape){#mini{height:44px}}
 #panel-run:fullscreen{background:var(--ink);padding:8px;display:flex;flex-direction:column;justify-content:center}
-#panel-run:fullscreen #stage{height:78vh}
-#mini{display:block;width:100%;height:56px;margin-top:6px;touch-action:none}
+#panel-run:fullscreen{overflow:auto}
+#mini{display:block;width:100%;height:56px;margin-top:6px}
 .minilab{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);padding:0 4px;margin-top:2px}
 .hud{position:absolute;top:2px;right:16px;font-family:var(--mono);font-size:11px;color:var(--mute);pointer-events:none}
 .hud b{color:var(--text);font-weight:600}
+.count{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-style:italic;font-weight:600;font-size:clamp(64px,16vw,120px);color:var(--amber);text-shadow:0 0 24px rgba(14,18,32,.95),0 0 8px rgba(14,18,32,1);pointer-events:none;line-height:1}
 .rotate{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:10.5px;color:var(--mute);pointer-events:none}
 .bar{position:absolute;top:2px;left:16px;font-family:var(--mono);font-size:11px;color:var(--mute);pointer-events:none}
 .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;background:rgba(14,18,32,.82);border-radius:14px;padding:10px}
@@ -130,7 +131,7 @@ input[type=range]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;bac
 
   <div class="tempo run-only">
     <span>Tempo</span>
-    <input type="range" id="bpm" min="40" max="180" step="2" value="72">
+    <input type="range" id="bpm" min="30" max="180" step="1" value="72">
     <output id="bpmOut">72</output>
     <button class="metbtn" id="metBtn" aria-pressed="true">🔊</button>
   </div>
@@ -153,7 +154,7 @@ input[type=range]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;bac
     <div class="card">
       <div class="field">
         <canvas id="stage"></canvas>
-        <div class="bar" id="barno"></div><div class="rotate hidden" id="rotate">gira el mòbil per veure 4 compassos per línia</div>
+        <div class="bar" id="barno"></div><div class="count hidden" id="count"></div><div class="rotate hidden" id="rotate">gira el mòbil per veure 4 compassos per línia</div>
         <div class="hud"><b id="hudNote">—</b> <span id="hudCents"></span></div>
         <div class="overlay" id="overlay">
           <h2 id="ovTitle">Lectura</h2>
@@ -820,7 +821,7 @@ function buildTargets(){
 const stage=$("stage"),g=stage.getContext("2d");
 const mini=$("mini"),mg=mini.getContext("2d");
 let W=0,H=0,L=14,MW=0,MH=0;
-let scrollY=0,scrollTarget=0,sysVisible=1;
+let curSys=-1;
 const MARGIN=8,TOPPAD=8;
 const C={staff:"rgba(122,130,166,.6)",ink:"#EDEBE4",faint:"rgba(122,130,166,.95)",
   grid:"rgba(43,50,82,.9)",dim:"rgba(122,130,166,.45)",ok:"#F2B441",bad:"#E0607E",cursor:"#7B6CF6"};
@@ -831,13 +832,14 @@ const perSystem=()=>isLandscape()?4:2;
 
 function sizeAll(){
   const dpr=Math.min(2,window.devicePixelRatio||1);
-  let r=stage.getBoundingClientRect();
-  W=r.width;H=r.height;
+  W=stage.getBoundingClientRect().width;
+  relayout();                                  // fixa L i l'alçada del canvas
+  const r=stage.getBoundingClientRect();
+  H=r.height;
   stage.width=W*dpr;stage.height=H*dpr;g.setTransform(dpr,0,0,dpr,0,0);
-  r=mini.getBoundingClientRect();
-  MW=r.width;MH=r.height;
+  const rm=mini.getBoundingClientRect();
+  MW=rm.width;MH=rm.height;
   mini.width=MW*dpr;mini.height=MH*dpr;mg.setTransform(dpr,0,0,dpr,0,0);
-  relayout();
   $("rotate").classList.toggle("hidden",isLandscape());
 }
 window.addEventListener("resize",()=>{if(S.mode==="run"){sizeAll();drawAll();}});
@@ -845,16 +847,15 @@ window.addEventListener("resize",()=>{if(S.mode==="run"){sizeAll();drawAll();}})
 function relayout(){
   if(!S.run.score||!W)return;
   const lay=layoutScore(S.run.score,perSystem());
-  /* la vista és sempre de N compassos; el pentagrama s'adapta a la densitat */
-  L=Math.max(6,Math.min((H-TOPPAD*2)/SYS_H,(W-MARGIN*2)/lay.maxSpaces));
+  /* vista fixa de N compassos: la mida surt només de l'amplada disponible */
+  L=Math.max(7,Math.min(22,(W-MARGIN*2)/lay.maxSpaces));
   scaleLayout(lay,L);
   S.run.lay=lay;
-  sysVisible=Math.max(1,Math.floor((H-TOPPAD)/lay.sysH));
-  scrollY=scrollTarget=0;
+  /* el canvas es fa tan alt com calgui: qui es desplaça és la pàgina */
+  stage.style.height=Math.round(lay.systems.length*lay.sysH+TOPPAD*2)+"px";
 }
-const maxScroll=()=>{const l=S.run.lay;
-  return Math.max(0,l.systems.length*l.sysH-(H-TOPPAD*2));};
-const sysY=i=>TOPPAD+i*S.run.lay.sysH-scrollY;
+
+const sysY=i=>TOPPAD+i*S.run.lay.sysH;
 function cfgStage(){return{L,refPos:refPos(),midY:0,C,showNames:S.showNames,
   syllableOf,useFlats:useFlats()};}
 
@@ -907,11 +908,6 @@ function drawAll(){
     }
     $("barno").textContent="sistema "+(q.sys+1)+"/"+lay.systems.length;
   }else $("barno").textContent=lay.systems.length+" sistemes";
-  if(R.state==="count"){
-    g.fillStyle="rgba(237,235,228,.9)";
-    g.font="italic 600 30px Fraunces, Georgia, serif";g.textAlign="center";
-    g.fillText(String(Math.ceil(-currentBeat())),W/2,H-14);g.textAlign="left";
-  }
   drawMiniNow();
 }
 function drawMiniNow(){
@@ -920,25 +916,13 @@ function drawMiniNow(){
     results:S.run.results,progressBeat:S.run.state==="playing"?Math.max(0,currentBeat()):-1});
 }
 
-/* desplaçament manual quan no s'està tocant */
-let drag=null;
-stage.addEventListener("pointerdown",e=>{
-  if(S.run.state==="playing"||S.run.state==="count")return;
-  drag={y:e.clientY,s:scrollY};stage.setPointerCapture(e.pointerId);
-});
-stage.addEventListener("pointermove",e=>{
-  if(!drag)return;
-  scrollY=scrollTarget=Math.max(0,Math.min(maxScroll(),drag.s-(e.clientY-drag.y)));
-  drawAll();
-});
-stage.addEventListener("pointerup",()=>{drag=null;});
-stage.addEventListener("pointercancel",()=>{drag=null;});
-stage.addEventListener("wheel",e=>{
-  if(S.run.state==="playing"||S.run.state==="count")return;
-  e.preventDefault();
-  scrollY=scrollTarget=Math.max(0,Math.min(maxScroll(),scrollY+e.deltaY));
-  drawAll();
-},{passive:false});
+/* la pàgina porta el sistema actual a la vista quan es canvia de línia */
+function bringSystemIntoView(i){
+  const r=stage.getBoundingClientRect();
+  const top=window.scrollY+r.top+TOPPAD+i*S.run.lay.sysH;
+  const want=top-Math.max(10,(window.innerHeight-S.run.lay.sysH)*0.3);
+  window.scrollTo({top:Math.max(0,want),behavior:"smooth"});
+}
 
 /* pantalla completa i gir */
 $("fsBtn").onclick=async()=>{
@@ -994,7 +978,7 @@ function micReason(e){
 function stopMic(){
   if(S.mic.stream)S.mic.stream.getTracks().forEach(t=>t.stop());
   S.mic={on:false,stream:null,analyser:null,buf:null};
-  S.run.state="idle";keepAwake(false);
+  S.run.state="idle";keepAwake(false);$("count").classList.add("hidden");
   $("micBtn").textContent="Activa el micròfon";$("startBtn").disabled=true;
   $("hudNote").textContent="—";$("hudCents").textContent="";
   showOverlay("Lectura","Activa el micròfon i prem Comença.");
@@ -1015,7 +999,7 @@ function startRun(){
   if(!S.mic.on||!S.run.score)return;
   const R=S.run;
   for(const t of R.targets)t.err=Infinity;
-  R.results=null;R.trail=[];scrollY=scrollTarget=0;
+  R.results=null;R.trail=[];curSys=-1;
   R.startAt=audio().currentTime+.35;R.nextClick=0;R.state="count";
   hideOverlay();keepAwake(true);
   $("startBtn").textContent="Torna-hi";
@@ -1034,7 +1018,7 @@ setInterval(()=>{
 },25);
 
 function finishRun(){
-  const R=S.run;R.state="done";keepAwake(false);
+  const R=S.run;R.state="done";keepAwake(false);$("count").classList.add("hidden");
   const res=R.targets.map(t=>{
     const err=isFinite(t.err)?t.err:400;
     return{midi:t.midi,err,pts:Math.max(0,Math.round(100*(1-err/ZERO_PTS))),ok:err<=S.gapCents};
@@ -1083,6 +1067,10 @@ function frame(ts){
   const R=S.run;
   if(R.state==="count"||R.state==="playing"){
     const b=currentBeat();
+    if(R.state==="count"){
+      $("count").textContent=String(Math.max(1,Math.ceil(-b)));
+      $("count").classList.remove("hidden");
+    }else $("count").classList.add("hidden");
     if(b>=0&&R.state==="count")R.state="playing";
     if(b>=R.totalBeats)finishRun();
     else if(b>=0){
@@ -1099,13 +1087,11 @@ function frame(ts){
       }
     }
   }
-  // la partitura no es mou: només passa de sistema quan cal
+  // la partitura no es mou; quan canvia de sistema, la pàgina s'hi acosta
   if(R.state==="playing"){
     const q=posAtBeat(R.lay,Math.max(0,currentBeat()));
-    const want=Math.max(0,Math.min(maxScroll(),q.sys*R.lay.sysH-(sysVisible>1?0:0)));
-    if(Math.abs(want-scrollTarget)>1)scrollTarget=want;
+    if(q.sys!==curSys){curSys=q.sys;bringSystemIntoView(q.sys);}
   }
-  scrollY+=(scrollTarget-scrollY)*Math.min(1,dt*7);
   drawAll();
 }
 
