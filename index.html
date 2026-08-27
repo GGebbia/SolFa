@@ -109,7 +109,7 @@ input[type=range]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;bac
       <label class="chip"><span>Do</span><select id="doSystem"><option value="movable">mòbil</option><option value="fixed">fix</option></select></label>
       <label class="chip run-only"><span>Clau</span><select id="clef"><option value="G">sol</option><option value="F">fa</option></select></label>
       <label class="chip run-only"><span>Compàs</span><select id="meter"><option value="2">2/4</option><option value="3">3/4</option><option value="4" selected>4/4</option></select></label>
-      <label class="chip run-only"><span>Vista</span><select id="look"><option value="0.5" selected>1 compàs i mig</option><option value="1">2 compassos</option><option value="2">3 compassos</option></select></label>
+      <label class="chip run-only"><span>Vista</span><select id="look"><option value="0">1 compàs</option><option value="0.5" selected>1 compàs i mig</option><option value="1">2 compassos</option><option value="2">3 compassos</option></select></label>
       <label class="chip run-only"><span>Figures</span><select id="figs">
         <option value="basic">negres i blanques</option>
         <option value="corx" selected>+ corxeres</option>
@@ -193,7 +193,6 @@ const ADV = { head:1.18, headWhole:1.688, dot:0.40, sharp:0.996, flat:0.904,
 const ENG = { stem:0.12, beam:0.50, staffLine:0.13, leger:0.16, legerExt:0.40,
               thinBar:0.16, thickBar:0.50, stemLen:3.50, tie:0.13 };
 
-const NOTE_OFF = 9;   // separació constant respecte de la barra de compàs
 const PC_POS = [0,0.5,1,1.5,2,3,3.5,4,4.5,5,5.5,6,7];
 const STEPS = ["C","D","E","F","G","A","B"];
 const STEP_SEMI = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
@@ -224,24 +223,41 @@ function figureOf(beats){
 }
 
 /* ---------------- LAYOUT ----------------
-   Torna posicions en "espai musical": x=0 és l'inici del primer compàs.  */
-function layoutScore(score, beatW){
+   Dues passades. Primer amplades en ESPAIS DE PENTAGRAMA (independents de la
+   mida), després escalat a píxels. Cada nota reserva el que ocupa realment:
+   alteració + cap + punts + banderola + separació mínima.                    */
+const SPACE_BY_DUR = { 0.5:2.3, 0.75:2.7, 1:3.1, 1.5:3.8, 2:4.4, 3:5.4, 4:6.2 };
+const PAD_AFTER_BAR = 0.7;      // després de la barra de compàs
+const PAD_BEFORE_BAR = 1.0;     // abans de la barra de compàs
+const MIN_GAP = 0.6;            // separació mínima entre dibuixos veïns
+
+function itemNeed(it){
+  const n = it.note;
+  let w = 0;
+  if (n.pitch && n.pitch.alter) w += (n.pitch.alter > 0 ? ADV.sharp : ADV.flat) + 0.28;
+  w += n.pitch ? (it.fig.type === "whole" ? ADV.headWhole : ADV.head) : 1.15;
+  w += it.fig.dots * (ADV.dot + 0.12);
+  if (n.pitch && it.fig.type === "eighth" && !it.group) w += 0.75;   // banderola
+  return w + MIN_GAP;
+}
+
+function layoutScore(score){
   const measures = [], items = [];
   let beat = 0;
   for (let mi = 0; mi < score.measures.length; mi++){
     const m = score.measures[mi];
-    const start = beat;
     const mItems = [];
     for (const n of m.notes){
       const beats = n.duration / score.divisions;
-      const it = { note:n, beat, beats, x: beat * beatW + NOTE_OFF * (beatW/60), fig: figureOf(beats), measure: mi };
+      const it = { note:n, beat, beats, fig: figureOf(beats), measure: mi };
       mItems.push(it); items.push(it);
       beat += beats;
     }
-    measures.push({ index:mi, startBeat:start, endBeat:beat, x:start*beatW,
-                    w:(beat-start)*beatW, items:mItems });
+    measures.push({ index:mi, items:mItems,
+      startBeat: mItems.length ? mItems[0].beat : beat, endBeat: beat });
   }
-  /* grups de corxeres dins d'una mateixa pulsació */
+  /* grups de corxeres: cal saber-los abans d'amidar, perquè una corxera unida
+     amb barra no porta banderola i ocupa menys                                */
   let gid = 0;
   for (let i = 0; i < items.length; i++){
     const it = items[i];
@@ -255,7 +271,49 @@ function layoutScore(score, beatW){
     }
     if (grp.length > 1){ gid++; grp.forEach(n => n.group = gid); }
   }
-  return { measures, items, beatW, totalBeats: beat, totalW: beat * beatW };
+  /* amplades en espais */
+  let x = 0;
+  for (const m of measures){
+    x += PAD_AFTER_BAR;
+    if (m.index === 0){ m.timeXs = x; x += ADV.timeSig + 0.9; }
+    m.xs = x - PAD_AFTER_BAR;
+    for (const it of m.items){
+      it.xs = x;
+      const base = SPACE_BY_DUR[it.beats] || (2.7 + 2.2 * Math.sqrt(it.beats));
+      it.ws = Math.max(base, itemNeed(it));
+      x += it.ws;
+    }
+    x += PAD_BEFORE_BAR;
+    m.barXs = x;
+    m.ws = x - m.xs;
+  }
+  const lay = { measures, items, totalBeats: beat, totalSpaces: x };
+  buildTimeMap(lay);
+  return lay;
+}
+/* mapa temps -> posició: lineal a trossos entre notes, com el cursor de MuseScore */
+function buildTimeMap(lay){
+  const pts = [];
+  for (const it of lay.items) pts.push({ b: it.beat, xs: it.xs });
+  pts.push({ b: lay.totalBeats, xs: lay.totalSpaces });
+  lay.timeMap = pts;
+}
+function xAtBeat(lay, b){
+  const p = lay.timeMap;
+  if (!p || !p.length) return 0;
+  if (b <= p[0].b) return p[0].xs * lay.scale;
+  let lo = 0, hi = p.length - 1;
+  while (lo < hi - 1){ const mid = (lo + hi) >> 1; (p[mid].b <= b) ? lo = mid : hi = mid; }
+  const a = p[lo], c = p[hi];
+  const t = c.b === a.b ? 0 : (b - a.b) / (c.b - a.b);
+  return (a.xs + (c.xs - a.xs) * t) * lay.scale;
+}
+/* escala el layout a píxels */
+function scaleLayout(lay, L){
+  lay.scale = L;
+  for (const m of lay.measures){ m.x = m.xs * L; m.w = m.ws * L; m.barX = m.barXs * L; }
+  for (const it of lay.items){ it.x = it.xs * L; it.w = it.ws * L; }
+  lay.totalW = lay.totalSpaces * L;
 }
 
 /* ---------------- DIBUIX ---------------- */
@@ -286,10 +344,6 @@ function drawGutter(g, score, cfg){
   const y = p => midY + d.yPos(p);
   if (score.clef === "F") d.glyph(SM.fClef, L * 0.5, y(refPos + 2));
   else d.glyph(SM.gClef, L * 0.5, y(refPos - 2));
-  const tx = L * 0.5 + (score.clef === "F" ? ADV.fClef : ADV.gClef) * L + L * 1.15;
-  const num = String(score.time.beats), den = String(score.time.beatType);
-  drawDigits(g, d, num, tx, y(refPos + 2), L);
-  drawDigits(g, d, den, tx, y(refPos - 2), L);
   return gw;
 }
 function drawDigits(g, d, s, x, y, L){
@@ -300,7 +354,7 @@ function drawDigits(g, d, s, x, y, L){
     cx += ADV.timeSig * L;
   }
 }
-const gutterW = L => L * (0.5 + 2.74 + 1.15 + 1.88 + 0.8);
+const gutterW = L => L * (0.5 + 2.74 + 0.8);
 
 /* dibuixa els compassos visibles; el context ja ha d'estar traslladat */
 function drawMeasures(g, score, lay, cfg, fromX, toX){
@@ -313,7 +367,7 @@ function drawMeasures(g, score, lay, cfg, fromX, toX){
     drawStaffLines(g, m.x, m.x + m.w, L, refPos, midY, C);
     // barra de compàs al final
     const last = m.index === lay.measures.length - 1;
-    const bx = m.x + m.w;
+    const bx = m.barX;
     g.strokeStyle = C.staff;
     if (last){
       g.lineWidth = ENG.thinBar * L;
@@ -325,6 +379,11 @@ function drawMeasures(g, score, lay, cfg, fromX, toX){
       g.beginPath(); g.moveTo(bx, y(refPos + 4)); g.lineTo(bx, y(refPos - 4)); g.stroke();
     }
 
+    if (m.timeXs !== undefined){
+      g.fillStyle = C.ink;
+      drawDigits(g, d, String(score.time.beats), m.timeXs * L + ADV.timeSig * L / 2, y(refPos + 2), L);
+      drawDigits(g, d, String(score.time.beatType), m.timeXs * L + ADV.timeSig * L / 2, y(refPos - 2), L);
+    }
     for (const it of m.items){
       const n = it.note;
       if (!n.pitch){ drawRest(g, d, it, y, L, refPos, C); continue; }
@@ -448,7 +507,7 @@ function drawMini(g, score, lay, cfg){
   // compassos
   g.strokeStyle = C.grid; g.lineWidth = 1;
   for (const m of lay.measures){
-    const x = padX + m.x * sx;
+    const x = padX + m.barX * sx;
     g.beginPath(); g.moveTo(x, padY * 0.5); g.lineTo(x, H - padY * 0.5); g.stroke();
   }
   // notes
@@ -457,17 +516,16 @@ function drawMini(g, score, lay, cfg){
     const x = padX + it.x * sx, y = yOf(pitchToPos(it.note.pitch));
     const r = results && results[i];
     g.fillStyle = !r ? C.dim : r.ok ? C.ok : C.bad;
-    const w = Math.max(2.5, it.beats * lay.beatW * sx);
+    const w = Math.max(2.5, it.w * sx);
     g.fillRect(x, y - 1.6, w, 3.2);
   }
   // progrés
   if (progressBeat >= 0){
-    const x = padX + progressBeat * lay.beatW * sx;
+    const x = padX + xAtBeat(lay, progressBeat) * sx;
     g.strokeStyle = C.cursor; g.lineWidth = 1.5;
     g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke();
   }
 }
-
 
 
 /* ============================================================
@@ -748,16 +806,18 @@ window.addEventListener("resize",()=>{if(S.mode==="run"){sizeAll();drawAll();}})
 function relayout(){
   if(!S.run.score||!W)return;
   const vb=S.meterN*(1+S.look);
-  /* la mida del pentagrama s'ajusta perquè dues corxeres seguides no es toquin:
-     cal beatW/2 >= 1.18*L de cap de nota, amb marge -> L <= beatW/2.45          */
-  L=Math.max(7,Math.min(H/12,W/(3.8*vb+6.35)));
-  const beatW=(W-gutterW(L))/vb;
-  S.run.lay=layoutScore(S.run.score,beatW);
+  /* el layout s'amida en espais de pentagrama i després s'escala, de manera
+     que la mida surt de la densitat real de l'exercici                        */
+  const lay=layoutScore(S.run.score);
+  const perBeat=lay.totalSpaces/Math.max(1,lay.totalBeats);
+  L=Math.max(7,Math.min(H/10,W/(perBeat*vb+4.05)));
+  scaleLayout(lay,L);
+  S.run.lay=lay;
 }
 function cfgStage(){
   return{L,refPos:refPos(),midY:H/2,C,showNames:S.showNames,syllableOf,useFlats:useFlats()};
 }
-function xOfBeat(b){return b*S.run.lay.beatW+NOTE_OFF*(S.run.lay.beatW/60);}
+function xOfBeat(b){return xAtBeat(S.run.lay,b);}
 
 function drawAll(){
   if(!S.run.lay||!W)return;
